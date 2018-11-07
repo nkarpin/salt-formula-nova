@@ -3873,7 +3873,7 @@ memcache_servers={%- for member in controller.cache.members %}{{ member.host }}:
 # This option is deprecated for removal since 16.0.0.
 # Its value may be silently ignored in the future.
 # Reason: Cells v1 is being replaced with Cells v2.
-enable = false
+# enable = false
 
 # DEPRECATED:
 # Name of the current cell.
@@ -8173,161 +8173,21 @@ passthrough_whitelist = {"devname":"{{ sriov.devname }}","physical_network":"{{ 
 
 [placement]
 
-#
-# From nova.conf
-#
-
-# DEPRECATED:
-# Region name of this node. This is used when picking the URL in the
-# service
-# catalog.
-#
-# Possible values:
-#
-# * Any string representing region name
-#  (string value)
-# This option is deprecated for removal since 17.0.0.
-# Its value may be silently ignored in the future.
-# Reason: Endpoint lookup uses the service catalog via common
-# keystoneauth1 Adapter configuration options.  Use the region_name
-# option instead.
-os_region_name = {{ controller.identity.region }}
-
-# DEPRECATED:
-# Endpoint interface for this node. This is used when picking the URL
-# in the
-# service catalog.
-#  (string value)
-# This option is deprecated for removal since 17.0.0.
-# Its value may be silently ignored in the future.
-# Reason: Endpoint lookup uses the service catalog via common
-# keystoneauth1 Adapter configuration options.  Use the
-# valid_interfaces option instead.
-#os_interface = <None>
-
-#
-# If True, when limiting allocation candidate results, the results
-# will be
-# a random sampling of the full result set. If False, allocation
-# candidates
-# are returned in a deterministic but undefined order. That is, all
-# things
-# being equal, two requests for allocation candidates will return the
-# same
-# results in the same order; but no guarantees are made as to how that
-# order
-# is determined.
-#  (boolean value)
-#randomize_allocation_candidates = false
-
-# PEM encoded Certificate Authority to use when verifying HTTPs
-# connections. (string value)
-#cafile = <None>
-{%- if controller.identity.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
-{%- endif %}
-
-# PEM encoded client certificate cert file (string value)
-#certfile = <None>
-
-# PEM encoded client certificate key file (string value)
-#keyfile = <None>
-
-# Verify HTTPS connections. (boolean value)
-#insecure = false
-
-# Timeout value for http requests (integer value)
-#timeout = <None>
-
-# Authentication type to load (string value)
-# Deprecated group/name - [placement]/auth_plugin
-auth_type = password
-
-# Config Section from which to load plugin specific options (string
-# value)
-#auth_section = <None>
-
-# Authentication URL (string value)
-#auth_url = <None>
-auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:35357/v3
-
-# Scope for system operations (string value)
-#system_scope = <None>
-
-# Domain ID to scope to (string value)
-#domain_id = <None>
-
-# Domain name to scope to (string value)
-#domain_name = <None>
-
-# Project ID to scope to (string value)
-#project_id = <None>
-
-# Project name to scope to (string value)
-project_name = {{ controller.identity.tenant }}
-
-# Domain ID containing project (string value)
-project_domain_id = {{ controller.identity.get('domain', 'default') }}
-
-# Domain name containing project (string value)
-#project_domain_name = <None>
-
-# Trust ID (string value)
-#trust_id = <None>
-
-# Optional domain ID to use with v3 and v2 parameters. It will be used
-# for both the user and project domain in v3 and ignored in v2
-# authentication. (string value)
-#default_domain_id = <None>
-
-# Optional domain name to use with v3 API and v2 parameters. It will
-# be used for both the user and project domain in v3 and ignored in v2
-# authentication. (string value)
-#default_domain_name = <None>
-
-# User ID (string value)
-#user_id = <None>
-
-# Username (string value)
-# Deprecated group/name - [placement]/user_name
-username = {{ controller.identity.user }}
-
-# User's domain id (string value)
-user_domain_id = {{ controller.identity.get('domain', 'default') }}
-
-# User's domain name (string value)
-#user_domain_name = <None>
-
-# User's password (string value)
-password = {{ controller.identity.password }}
-
-# Tenant ID (string value)
-#tenant_id = <None>
-
-# Tenant Name (string value)
-#tenant_name = <None>
-
-# The default service_type for endpoint URL discovery. (string value)
-#service_type = placement
-
-# The default service_name for endpoint URL discovery. (string value)
-#service_name = <None>
+{%- set _data = controller.identity %}
+{%- set auth_type = _data.get('auth_type', 'password') %}
+{%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': controller.cacert_file}) %}{% endif %}
+{%- include "oslo_templates/files/queens/keystoneauth/_type_" + auth_type + ".conf" %}
 
 # List of interfaces, in order of preference, for endpoint URL. (list
 # value)
 # Deprecated group/name - [placement]/os_interface
-valid_interfaces = internal
-
-# The default region_name for endpoint URL discovery. (string value)
-# Deprecated group/name - [placement]/os_region_name
-#region_name = <None>
+valid_interfaces = {{ controller.identity.get('valid_interfaces', 'internal') }}
 
 # Always use this endpoint URL for requests for this client. NOTE: The
 # unversioned endpoint should be specified here; to request a
 # particular API version, use the `version`, `min-version`, and/or
 # `max-version` options. (string value)
 #endpoint_override = <None>
-
 
 [quota]
 #
