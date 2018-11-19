@@ -7134,9 +7134,7 @@ url={{ controller.network.get('protocol', 'http') }}://{{ controller.network.hos
 {%- if controller.network.get('protocol', 'http') == 'https' %}
 cafile={{ controller.network.get('cacert_file', controller.cacert_file) }}
 {%- endif %}
-{%- if controller.get('networking', 'default') != "contrail" %}
 metadata_proxy_shared_secret={{ controller.metadata.password }}
-{%- endif %}
 service_metadata_proxy=True
 #
 # This option specifies the URL for connecting to Neutron.
