@@ -7354,6 +7354,9 @@ hw_disk_discard={{ compute.libvirt.hw_disk_discard }}
 #  (boolean value)
 # Deprecated group/name - [libvirt]/iscsi_use_multipath
 #volume_use_multipath = false
+{%- if compute.libvirt.volume_use_multipath is defined %}
+volume_use_multipath={{ compute.libvirt.volume_use_multipath }}
+{%- endif %}
 
 #
 # Number of times to scan given storage protocol to find volume.

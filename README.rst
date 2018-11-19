@@ -502,6 +502,16 @@ Nova metadata custom bindings:
             address: 1.2.3.4
             port: 8776
 
+Define multipath for nova compute:
+
+.. code-block:: yaml
+
+    nova:
+      compute:
+        ....
+        libvirt:
+          volume_use_multipath: True
+
 Client role
 -----------
 
