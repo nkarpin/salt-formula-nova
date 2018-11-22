@@ -7725,9 +7725,7 @@ service_metadata_proxy=True
 # * service_metadata_proxy
 #  (string value)
 #metadata_proxy_shared_secret =
-{%- if controller.get('networking', 'default') != "contrail" %}
 metadata_proxy_shared_secret = {{ controller.metadata.password }}
-{%- endif %}
 
 # PEM encoded Certificate Authority to use when verifying HTTPs
 # connections. (string value)
