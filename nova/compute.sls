@@ -545,6 +545,8 @@ virsh net-undefine default:
   - require:
     - pkg: nova_compute_packages
     - cmd: virsh net-undefine default
+  - watch_in:
+    - service: nova_compute_services
   - watch:
     - file: /etc/libvirt/{{ compute.libvirt_config }}
     - file: /etc/libvirt/qemu.conf
