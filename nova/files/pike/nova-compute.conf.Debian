@@ -7201,7 +7201,6 @@ extension_sync_interval={{ compute.network.get('extension_sync_interval', '600')
 auth_type = v3password
 project_domain_name = Default
 user_domain_name = Default
-timeout=30
 #
 # This option specifies the URL for connecting to Neutron.
 #
