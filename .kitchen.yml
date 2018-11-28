@@ -17,13 +17,16 @@ provisioner:
   dependencies:
     - name: linux
       repo: git
-      source: https://github.com/salt-formulas/salt-formula-linux
+      source: https://gerrit.mcp.mirantis.com/salt-formulas/linux
     - name: keystone
       repo: git
-      source: https://github.com/salt-formulas/salt-formula-keystone
+      source: https://gerrit.mcp.mirantis.com/salt-formulas/keystone
     - name: apache
       repo: git
-      source: https://github.com/salt-formulas/salt-formula-apache
+      source: https://gerrit.mcp.mirantis.com/salt-formulas/apache
+    - name: oslo_templates
+      repo: git
+      source: https://gerrit.mcp.mirantis.com/salt-formulas/oslo-templates
   state_top:
     base:
       "*":
@@ -57,7 +60,7 @@ platforms:
       platform: ubuntu
 
 suites:
-<% for os_version in ['mitaka','newton','ocata','pike'] %>
+<% for os_version in ['mitaka','newton','ocata','pike', 'queens', 'rocky'] %>
   - name: compute_cluster
     provisioner:
       pillars-from-files:

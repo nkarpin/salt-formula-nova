@@ -1,3 +1,5 @@
+{%- set os_family = salt['grains.get']('os_family', '') %}
+
 {%- set default_params = {
     'cacert_file': salt['grains.filter_by']({
         'Debian': '/etc/ssl/certs/ca-certificates.crt',
@@ -17,16 +19,18 @@
     'vnc_protocol': 'http',
 } %}
 
-{%- if grains.os_family == "Debian" %}
-{%- set pkgs_list = [ 'nova-common', 'nova-consoleproxy', 'novnc', 'nova-api', 'nova-conductor', 'nova-consoleauth', 'nova-doc', 'nova-scheduler', 'python-novaclient', 'python-memcache', 'gettext-base', 'python-pycadf'] %}
+{%- if os_family == "Debian" %}
+{%- set pkgs_list = ['nova-api', 'nova-conductor', 'nova-consoleauth', 'nova-scheduler', 'python-novaclient'] %}
 {%- set services_list = ['nova-conductor', 'nova-api', 'nova-consoleauth', 'nova-scheduler', 'nova-novncproxy'] %}
-{%- if pillar.nova.controller is defined and pillar.nova.controller.get('version',{}) in ["juno", "kilo", "liberty", "mitaka"] %}
+{%- set controller_version = pillar.nova.controller is defined and pillar.nova.controller.get('version', None) %}
+{%- if controller_version in ['juno', 'kilo', 'liberty', 'mitaka'] %}
 {%- do pkgs_list.append('nova-cert') %}
 {%- do services_list.append('nova-cert') %}
 {%- endif %}
+{%- do pkgs_list.append('nova-novncproxy' if controller_version in ['rocky'] else 'nova-consoleproxy') %}
 {%- endif %}
 
-{%- if grains.os_family == "RedHat" %}
+{%- if os_family == "RedHat" %}
 {%- set pkgs_list = ['openstack-nova-novncproxy', 'python-nova', 'openstack-nova-api', 'openstack-nova-console', 'openstack-nova-scheduler', 'python-novaclient', 'openstack-nova-common', 'openstack-nova-conductor', 'python-pycadf'] %}
 {%- set services_list = ['openstack-nova-conductor', 'openstack-nova-api', 'openstack-nova-consoleauth', 'openstack-nova-scheduler', 'openstack-nova-novncproxy'] %}
 {%- if pillar.nova.controller is defined and pillar.nova.controller.get('version',{}) in ["juno", "kilo", "liberty", "mitaka", "newton", "ocata"] %}
@@ -311,4 +315,3 @@ RedHat:
         'endpoint_failed_major_threshold': 0.5,
     },
 }, grain='os_family', merge=salt['pillar.get']('nova:monitoring')) %}
-

@@ -33,14 +33,14 @@ nova:
       password: password
       tenant: service
     logging:
-      log_appender: false
+      log_appender: true
       log_handlers:
         watchedfile:
           enabled: true
         fluentd:
-          enabled: false
+          enabled: true
         ossyslog:
-          enabled: false
+          enabled: true
     message_queue:
       engine: rabbitmq
       members:
