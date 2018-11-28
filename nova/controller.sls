@@ -347,7 +347,7 @@ nova_update_cell1:
   - name: "cell1"
   - db_name: {{ controller.database.name }}
 {%- if controller.message_queue.members is defined %}
-  - transport_url = rabbit://{% for member in controller.message_queue.members -%}
+  - transport_url: rabbit://{% for member in controller.message_queue.members -%}
                              {{ controller.message_queue.user }}:{{ controller.message_queue.password }}@{{ member.host }}:{{ member.get('port', rabbit_port) }}
                              {%- if not loop.last -%},{%- endif -%}
                          {%- endfor -%}
