@@ -445,7 +445,7 @@ def service_enabled(name, cloud_name, binary="nova-compute"):
     changes = {}
 
     services = _call_nova_salt_module('services_list', name)(
-        name, service=binary, cloud_name=cloud_name)
+        name, binary=binary, cloud_name=cloud_name)
     enabled_service = [s for s in services if s['binary'] == binary
                        and s['status'] == 'enabled' and s['host'] == name]
     if len(enabled_service) > 0:
@@ -472,7 +472,7 @@ def service_disabled(name, cloud_name, binary="nova-compute", disabled_reason=No
         kwargs['disabled_reason'] = disabled_reason
 
     services = _call_nova_salt_module('services_list', name)(
-        name, service=binary, cloud_name=cloud_name)
+        name, binary=binary, cloud_name=cloud_name)
     disabled_service = [s for s in services if s['binary'] == binary
                        and s['status'] == 'disabled' and s['host'] == name]
     if len(disabled_service) > 0:

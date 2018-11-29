@@ -31,39 +31,39 @@ def list_(*args, **kwargs):
 
 @common.function_descriptor('update', 'Compute service', 'service')
 @common.send('put')
-def update(host, service, action, **kwargs):
+def update(host, binary, action, **kwargs):
     """Enable/Disable nova service"""
     if kwargs.get('disabled_reason') and action == 'disable':
       url = '/os-services/disable-log-reason'
-      req = {"host": host, "binary": service, "disabled_reason": kwargs['disabled_reason']}
+      req = {"host": host, "binary": binary, "disabled_reason": kwargs['disabled_reason']}
     else:
       url = '/os-services/%s' % action
-      req = {"host": host, "binary": service}
+      req = {"host": host, "binary": binary}
     return url, {"json": req}
 
 
-def wait_for_services(cloud_name, host=None, service=None, admin_up_only=True, retries=18, timeout=10, **kwargs):
+def wait_for_services(cloud_name, host=None, binary=None, admin_up_only=True, retries=18, timeout=10, **kwargs):
     """Ensure the service is up and running on specified host.
 
     :param host:           name of a host where service is running
     :param admin_up_only:  do not check status for admin disabled service
-    :param service:        name of the service (by default nova-compute)
+    :param binary:         name of the service (by default nova-compute)
     :param timeout:        number of seconds to wait before retries
     :param retries:        number of retries
     """
     kwargs = {}
     if host is not None:
         kwargs['host'] = host
-    if service is not None:
-        kwargs['service'] = service
+    if binary is not None:
+        kwargs['binary'] = binary
 
     for i in range(retries):
         services = list_(cloud_name=cloud_name, **kwargs)['body'].get('services')
 
         if admin_up_only:
-            down_services = [s for s in services if (not service or s['binary'] == service) and s['status'] == 'enabled' and s['state'] == 'down']
+            down_services = [s for s in services if (not binary or s['binary'] == binary) and s['status'] == 'enabled' and s['state'] == 'down']
         else:
-            down_services = [s for s in services if (not service or s['binary'] == service) and s['state'] == 'down']
+            down_services = [s for s in services if (not binary or s['binary'] == binary) and s['state'] == 'down']
 
         if len(down_services) == 0:
             return 'Compute services with admin_up_only=%s are up or disabled administratively' % (admin_up_only)
