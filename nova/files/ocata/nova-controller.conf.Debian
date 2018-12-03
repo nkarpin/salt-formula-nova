@@ -3111,6 +3111,19 @@ rpc_backend=rabbit
 # value means endless wait. (integer value)
 #graceful_shutdown_timeout=60
 
+#Shared storage for instances or not.
+#This option is used to distinguish different way to calculate disk usage
+#while getting hypervisor-stats.
+#ENABLE THIS ONLY WHEN ALL COMPUTE NODES ARE USING THE SAME SHARED STORAGE!
+#Otherwise stats report will be skewed.
+#Possible values:
+#* True: Average all the compute node's disk usage
+#* False: Sum all the compute node's disk usage
+# shared_storage =
+{%- if controller.shared_storage is defined %}
+shared_storage = {{ controller.shared_storage }}
+{%- endif %}
+
 
 [api]
 #
