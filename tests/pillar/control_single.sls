@@ -87,6 +87,7 @@ nova:
       'context_is_admin': 'role:admin or role:administrator'
       'compute:create': 'rule:admin_or_owner'
       'compute:create:attach_network':
+    reclaim_instance_interval: 60
 apache:
   server:
     enabled: true

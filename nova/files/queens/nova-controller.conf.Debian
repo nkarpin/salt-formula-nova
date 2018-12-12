@@ -916,6 +916,9 @@ block_device_allocate_retries = {{ controller.get('block_device_allocate_retries
 # * Any value <=0 will disable the option.
 #  (integer value)
 #reclaim_instance_interval = 0
+{%- if controller.reclaim_instance_interval is defined %}
+reclaim_instance_interval = {{ controller.reclaim_instance_interval }}
+{%- endif %}
 
 #
 # Interval for gathering volume usages.

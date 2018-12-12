@@ -852,6 +852,9 @@ heal_instance_info_cache_interval = {{ compute.heal_instance_info_cache_interval
 # * Any value <=0 will disable the option.
 #  (integer value)
 #reclaim_instance_interval=0
+{%- if compute.reclaim_instance_interval is defined %}
+reclaim_instance_interval = {{ compute.reclaim_instance_interval }}
+{%- endif %}
 
 #
 # Interval for gathering volume usages.

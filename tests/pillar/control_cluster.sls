@@ -77,6 +77,7 @@ nova:
       enabled: true
     consoleauth:
       token_ttl: 600
+    reclaim_instance_interval: 60
 apache:
   server:
     enabled: true
