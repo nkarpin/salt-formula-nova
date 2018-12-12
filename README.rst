@@ -1236,29 +1236,3 @@ of phases might and theirs descriptions are listed in table below:
 |                               | operations, verify do not have dead network          |
 |                               | agents/compute services)                             |
 +-------------------------------+------------------------------------------------------+
-
-Documentation and Bugs
-======================
-
-* http://salt-formulas.readthedocs.io/
-   Learn how to install and update salt-formulas
-
-* https://github.com/salt-formulas/salt-formula-nova/issues
-   In the unfortunate event that bugs are discovered, report the issue to the
-   appropriate issue tracker. Use the Github issue tracker for a specific salt
-   formula
-
-* https://launchpad.net/salt-formulas
-   For feature requests, bug reports, or blueprints affecting the entire
-   ecosystem, use the Launchpad salt-formulas project
-
-* https://launchpad.net/~salt-formulas-users
-   Join the salt-formulas-users team and subscribe to mailing list if required
-
-* https://github.com/salt-formulas/salt-formula-nova
-   Develop the salt-formulas projects in the master branch and then submit pull
-   requests against a specific formula
-
-* #salt-formulas @ irc.freenode.net
-   Use this IRC channel in case of any questions or feedback which is always
-   welcome
