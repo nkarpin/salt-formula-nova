@@ -3,7 +3,7 @@ Upstream-Name: salt-formula-nova
 Source: https://github.com/openstack/salt-formula-nova
 
 Files: *
-Copyright: 2014-2016 tcp cloud
+Copyright: 2014-2019 Mirantis Inc. et al
 License: Apache-2.0
 
 Files: debian/*

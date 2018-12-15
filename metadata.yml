@@ -3,6 +3,6 @@ version: "2017.2"
 source: "https://github.com/openstack/salt-formula-nova"
 dependencies:
   - name: keystone
-    source: "https://github.com/salt-formulas/salt-formula-keystone"
+    source: "https://gerrit.mcp.mirantis.com/salt-formulas/keystone"
   - name: apache
-    source: "https://github.com/salt-formulas/salt-formula-apache"
+    source: "https://gerrit.mcp.mirantis.com/salt-formulas/apache"
