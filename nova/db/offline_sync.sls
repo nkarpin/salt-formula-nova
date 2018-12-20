@@ -7,6 +7,7 @@ nova_controller_sync_apidb:
   {%- if grains.get('noservices') or controller.get('role', 'primary') == 'secondary' %}
   - onlyif: /bin/false
   {%- endif %}
+  - runas: 'nova'
   - require_in:
     - nova_controller_syncdb
 
@@ -20,6 +21,7 @@ nova_controller_map_cell0:
   {%- if grains.get('noservices') %}
   - onlyif: /bin/false
   {%- endif %}
+  - runas: 'nova'
   - require:
     - nova_controller_sync_apidb
 
@@ -30,6 +32,7 @@ nova_cell1_create:
   - onlyif: /bin/false
   {%- endif %}
   - unless: 'nova-manage cell_v2 list_cells | grep cell1'
+  - runas: 'nova'
   - require:
     - nova_controller_map_cell0
   - require_in:
@@ -43,3 +46,4 @@ nova_controller_syncdb:
   {%- if grains.get('noservices') or controller.get('role', 'primary') == 'secondary' %}
   - onlyif: /bin/false
   {%- endif %}
+  - runas: 'nova'

@@ -9,3 +9,4 @@ nova_controller_online_data_migrations:
   cmd.run:
   - name: nova-manage db online_data_migrations
   - onlyif: {{ should_run }}
+  - runas: 'nova'

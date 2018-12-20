@@ -423,6 +423,7 @@ nova_controller_discover_hosts:
   {%- if grains.get('noservices') %}
   - onlyif: /bin/false
   {%- endif %}
+  - runas: 'nova'
   - require:
     - sls: nova.db.offline_sync
 
