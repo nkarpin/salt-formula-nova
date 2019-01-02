@@ -1,4 +1,4 @@
-{% from "nova/map.jinja" import controller with context %}
+{% from "nova/map.jinja" import controller,cells_params with context %}
 
 {%- if controller.version not in ["juno", "kilo", "liberty"] %}
 nova_controller_sync_apidb:
@@ -14,10 +14,18 @@ nova_controller_sync_apidb:
 {%- endif %}
 
 {%- if controller.version not in ["juno", "kilo", "liberty", "mitaka", "newton"] %}
+{%- set cells = controller.cells %}
 
 nova_controller_map_cell0:
   cmd.run:
+  {%- if cells_params.cell0 is defined %}
+    {%- if cells_params.cell0.connection is defined %}
+  - name: nova-manage cell_v2 map_cell0 --database_connection {{ cells_params.cell0.connection }}
+    {%- endif %}
+    {%- do cells_params.pop('cell0') %}
+  {%- else %}
   - name: nova-manage cell_v2 map_cell0
+  {%- endif %}
   {%- if grains.get('noservices') %}
   - onlyif: /bin/false
   {%- endif %}
@@ -25,18 +33,29 @@ nova_controller_map_cell0:
   - require:
     - nova_controller_sync_apidb
 
-nova_cell1_create:
+  {%- for cell_name, cell in cells_params.items() %}
+    {%- set cell_args = '--name=' + cells[cell_name].get('name', cell_name) %}
+    {%- if cells_params[cell_name].transport_url is defined %}
+      {%- set cell_args = cell_args + ' --transport-url ' + cells_params[cell_name].transport_url %}
+    {%- endif %}
+    {%- if cells_params[cell_name].connection is defined %}
+      {%- set cell_args = cell_args + ' --database_connection ' + cells_params[cell_name].connection %}
+    {%- endif %}
+
+nova_{{ cell_name }}_create:
   cmd.run:
-  - name: nova-manage cell_v2 create_cell --name=cell1 --verbose
+  - name: nova-manage cell_v2 create_cell --verbose {{ cell_args }}
   {%- if grains.get('noservices') %}
   - onlyif: /bin/false
   {%- endif %}
-  - unless: 'nova-manage cell_v2 list_cells | grep cell1'
+  - unless: 'nova-manage cell_v2 list_cells | grep {{ cell_name }}'
   - runas: 'nova'
   - require:
     - nova_controller_map_cell0
   - require_in:
     - nova_controller_syncdb
+
+  {%- endfor %}
 
 {%- endif %}
 

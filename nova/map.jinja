@@ -46,6 +46,9 @@
         'audit': {
           'enabled': false
         },
+        'cells': {
+          'cell1': {},
+        },
         'logging': {
           'app_name': 'nova',
           'log_appender': false,
@@ -110,6 +113,44 @@
         },
     },
 }, merge=pillar.nova.get('controller', {}), base='BaseDefaults') %}
+
+{%- set connection_x509_ssl_option = '' %}
+{%- if controller.get('database', {}).get('x509',{}).get('enabled',False) %}
+  {%- set connection_x509_ssl_option = '&ssl_ca=' ~ controller.database.x509.ca_file ~ '&ssl_cert=' ~ controller.database.x509.cert_file ~ '&ssl_key=' ~ controller.database.x509.key_file %}
+{%- elif controller.get('database', {}).get('ssl',{}).get('enabled',False) %}
+  {%- set connection_x509_ssl_option = '&ssl_ca=' ~ controller.database.ssl.get('cacert_file', controller.cacert_file) %}
+{%- endif %}
+
+{%- set cells_params = {} %}
+
+{%- for cell_name, cell in controller.get('cells', {}).items() %}
+  {%- do cells_params.update({cell_name:{}}) %}
+  {%- set cell_database = cell.get('database', {}) %}
+  {%- set cell_message_queue = cell.get('message_queue', controller.get('message_queue', {})) %}
+  {%- set cell_rabbit_port = cell_message_queue.get('port', '5671' if cell_message_queue.get('ssl',{}).get('enabled', False) else '5672') %}
+  {%- if cell_database %}
+    {%- set cell_connection_x509_ssl_option = connection_x509_ssl_option %}
+    {%- if cell_database.get('x509',{}).get('enabled',False) %}
+      {%- set cell_connection_x509_ssl_option = '&ssl_ca=' ~ cell_database.x509.ca_file ~ '&ssl_cert=' ~ cell_database.x509.cert_file ~ '&ssl_key=' ~ cell_database.x509.key_file %}
+    {%- elif cell_database.get('ssl',{}).get('enabled',False) %}
+      {%- set cell_connection_x509_ssl_option = '&ssl_ca=' ~ cell_database.ssl.get('cacert_file', controller.cacert_file) %}
+    {%- endif %}
+
+    {%- do cells_params[cell_name].update({'connection': cell_database.engine + '+pymysql://' + cell_database.user + ':' + cell_database.password + '@' +  cell_database.host + '/' + cell_database.name + '?charset=utf8' + cell_connection_x509_ssl_option}) %}
+  {%- endif %}
+
+  {%- if cell_message_queue.members is defined %}
+    {%- set members = [] %}
+    {%- for member in cell_message_queue.members %}
+      {%- do members.append(cell_message_queue.user + ':' + cell_message_queue.password + '@' + member.host + ':' + member.get('port', cell_rabbit_port)|string) %}
+    {%- endfor %}
+    {%- do cells_params[cell_name].update({'transport_url':'rabbit://' + members|join(',') + '/' + cell_message_queue.virtual_host}) %}
+  {%- else %}
+    {%- do cells_params[cell_name].update({'transport_url':'rabbit://' + cell_message_queue.user + ':' + cell_message_queue.password + '@' + cell_message_queue.host + ':' + cell_rabbit_port|string + '/' + cell_message_queue.virtual_host}) %}
+  {%- endif %}
+
+{%- endfor %}
+
 
 {% set upgrade = pillar.get('nova', {}).get('upgrade', {}) %}
 {% set pin_level = pillar.get('nova', {}).get('upgrade', {}).get('old_release','') %}
