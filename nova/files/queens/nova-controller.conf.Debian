@@ -3713,13 +3713,14 @@ fping_path = /usr/sbin/fping
 #  (boolean value)
 #enable_instance_password = true
 
-
+{%- if controller.get('api',{}).get('enabled', True) %}
 [api_database]
 {%- set _data = {} %}
 {%- do _data.update(controller.database) %}
 {%- do _data.update({'name': 'nova_api'}) %}
 {%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': controller.cacert_file}) %}{% endif %}
 {%- include "oslo_templates/files/queens/oslo/_database.conf" %}
+{%- endif %}
 
 {%- if controller.get('barbican', {}).get('enabled', False) %}
 {%- set _data = controller.identity %}

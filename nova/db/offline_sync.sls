@@ -1,6 +1,6 @@
 {% from "nova/map.jinja" import controller,cells_params with context %}
 
-{%- if controller.version not in ["juno", "kilo", "liberty"] %}
+{%- if controller.version not in ["juno", "kilo", "liberty"] and controller.get('api', {}).get('enabled', True) %}
 nova_controller_sync_apidb:
   cmd.run:
   - name: nova-manage api_db sync
@@ -13,7 +13,7 @@ nova_controller_sync_apidb:
 
 {%- endif %}
 
-{%- if controller.version not in ["juno", "kilo", "liberty", "mitaka", "newton"] %}
+{%- if controller.version not in ["juno", "kilo", "liberty", "mitaka", "newton"] and controller.get('api', {}).get('enabled', True) %}
 {%- set cells = controller.cells %}
 
 nova_controller_map_cell0:
