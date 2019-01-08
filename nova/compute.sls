@@ -531,10 +531,10 @@ nova_libvirt_restart_systemd:
 
 virsh net-undefine default:
   cmd.run:
-  - name: "virsh net-destroy default"
+  - name: "virsh net-destroy default; virsh net-undefine default"
   - require:
     - pkg: nova_compute_packages
-  - onlyif: "virsh net-list | grep default"
+  - onlyif: "virsh net-list --all --name |grep -w default"
 
 {{ compute.libvirt_service }}:
   service.running:
