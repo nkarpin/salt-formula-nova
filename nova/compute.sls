@@ -1,4 +1,4 @@
-{%- from "nova/map.jinja" import compute with context %}
+{%- from "nova/map.jinja" import compute,api,conductor with context %}
 
 {%- if compute.get('enabled') %}
 include:
@@ -83,15 +83,17 @@ user_libvirt-qemu:
 
 {%- endif %}
 
-{%- if not pillar.nova.get('controller',{}).get('enabled') %}
 /etc/nova/nova.conf:
   file.managed:
+{%- if not pillar.nova.get('controller',{}).get('enabled') and not api.get('enabled') and not conductor.get('enabled') %}
   - source: salt://nova/files/{{ compute.version }}/nova-compute.conf.{{ grains.os_family }}
+{%- else %}
+  - source: salt://nova/files/{{ compute.version }}/nova-controller.conf.{{ grains.os_family }}
+{%- endif %}
   - template: jinja
   - require:
     - pkg: nova_compute_packages
     - sls: nova._ssl.rabbitmq
-{%- endif %}
 
 {% for service_name in compute.services %}
 {{ service_name }}_default:

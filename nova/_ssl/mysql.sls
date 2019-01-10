@@ -1,20 +1,26 @@
-{% from "nova/map.jinja" import controller with context %}
+{% from "nova/map.jinja" import cfg,controller with context %}
 
 nova_ssl_mysql:
   test.show_notification:
     - text: "Running nova._ssl.mysql"
 
-{%- if controller.database.get('x509',{}).get('enabled',False) %}
+{%- if controller.get('enabled') %}
+  {%- set role = 'controller' %}
+{%- else %}
+  {%- set role = 'common' %}
+{%- endif %}
 
-  {%- set ca_file=controller.database.x509.ca_file %}
-  {%- set key_file=controller.database.x509.key_file %}
-  {%- set cert_file=controller.database.x509.cert_file %}
+{%- if cfg.database.get('x509',{}).get('enabled',False) %}
+
+  {%- set ca_file=cfg.database.x509.ca_file %}
+  {%- set key_file=cfg.database.x509.key_file %}
+  {%- set cert_file=cfg.database.x509.cert_file %}
 
 mysql_nova_ssl_x509_ca:
-  {%- if controller.database.x509.cacert is defined %}
+  {%- if cfg.database.x509.cacert is defined %}
   file.managed:
     - name: {{ ca_file }}
-    - contents_pillar: nova:controller:database:x509:cacert
+    - contents_pillar: nova:{{ role }}:database:x509:cacert
     - mode: 644
     - user: root
     - group: nova
@@ -25,10 +31,10 @@ mysql_nova_ssl_x509_ca:
   {%- endif %}
 
 mysql_nova_client_ssl_cert:
-  {%- if controller.database.x509.cert is defined %}
+  {%- if cfg.database.x509.cert is defined %}
   file.managed:
     - name: {{ cert_file }}
-    - contents_pillar: nova:controller:database:x509:cert
+    - contents_pillar: nova:{{ role }}:database:x509:cert
     - mode: 640
     - user: root
     - group: nova
@@ -39,10 +45,10 @@ mysql_nova_client_ssl_cert:
   {%- endif %}
 
 mysql_nova_client_ssl_private_key:
-  {%- if controller.database.x509.key is defined %}
+  {%- if cfg.database.x509.key is defined %}
   file.managed:
     - name: {{ key_file }}
-    - contents_pillar: nova:controller:database:x509:key
+    - contents_pillar: nova:{{ role }}:database:x509:key
     - mode: 640
     - user: root
     - group: nova
@@ -61,24 +67,24 @@ mysql_nova_ssl_x509_set_user_and_group:
     - user: root
     - group: nova
 
-  {% elif controller.database.get('ssl',{}).get('enabled',False) %}
-mysql_ca_nova_controller:
-  {%- if controller.database.ssl.cacert is defined %}
+  {% elif cfg.database.get('ssl',{}).get('enabled',False) %}
+mysql_ca_nova_{{ role }}:
+  {%- if cfg.database.ssl.cacert is defined %}
   file.managed:
-    - name: {{ controller.database.ssl.cacert_file }}
-    - contents_pillar: nova:controller:database:ssl:cacert
+    - name: {{ cfg.database.ssl.cacert_file }}
+    - contents_pillar: nova:{{ role }}:database:ssl:cacert
     - mode: 644
     - makedirs: true
     - user: root
     - group: nova
   {%- else %}
   file.exists:
-    - name: {{ controller.database.ssl.get('cacert_file', controller.cacert_file) }}
+    - name: {{ cfg.database.ssl.get('cacert_file', cfg.cacert_file) }}
   {%- endif %}
 
 mysql_nova_ssl_set_user_and_group:
   file.managed:
-    - name: {{ controller.database.ssl.get('cacert_file', controller.cacert_file) }}
+    - name: {{ cfg.database.ssl.get('cacert_file', cfg.cacert_file) }}
     - user: root
     - group: nova
 

@@ -312,3 +312,200 @@ RedHat:
     },
 }, grain='os_family', merge=salt['pillar.get']('nova:monitoring')) %}
 
+{# TODO: check why pycadf and nova-doc are needed and for whom #}
+{% set cfg = salt['grains.filter_by']({
+    'BaseDefaults': default_params,
+    'Debian': {
+        'debug': false,
+        'notification': false,
+        'cors': {},
+        'audit': {
+          'enabled': false
+        },
+        'logging': {
+          'app_name': 'nova',
+          'log_appender': false,
+          'log_handlers': {
+            'watchedfile': {
+              'enabled': true
+            }
+          }
+        },
+        'novncproxy': {
+          'tls': {
+            'enabled': false,
+            'server': {
+              'key_file': '/etc/pki/nova-novncproxy/server-key.pem',
+              'cert_file': '/etc/pki/nova-novncproxy/server-cert.pem',
+            }
+          },
+          'vencrypt': {
+            'tls': {
+              'enabled': false,
+              'key_file': '/etc/pki/nova-novncproxy/client-key.pem',
+              'cert_file': '/etc/pki/nova-novncproxy/client-cert.pem',
+              'ca_file': '/etc/pki/nova-novncproxy/ca-cert.pem',
+            }
+          }
+        },
+    },
+    'RedHat': {
+        'pkgs': pkgs_list,
+        'services': services_list,
+        'debug': false,
+        'notification': false,
+        'cors': {},
+        'audit': {
+          'enabled': false
+        },
+        'logging': {
+          'app_name': 'nova',
+          'log_appender': false,
+          'log_handlers': {
+            'watchedfile': {
+              'enabled': true
+            }
+          }
+        },
+        'novncproxy': {
+          'tls': {
+            'enabled': false,
+            'server': {
+              'key_file': '/etc/pki/nova-novncproxy/server-key.pem',
+              'cert_file': '/etc/pki/nova-novncproxy/server-cert.pem',
+            }
+          },
+          'vencrypt': {
+            'tls': {
+              'enabled': false,
+              'key_file': '/etc/pki/nova-novncproxy/client-key.pem',
+              'cert_file': '/etc/pki/nova-novncproxy/client-cert.pem',
+              'ca_file': '/etc/pki/nova-novncproxy/ca-cert.pem',
+            }
+          }
+        },
+    },
+}, merge=pillar.nova.get('common', {}), base='BaseDefaults') %}
+
+{%- if controller.get('enabled', False) %}
+
+{% set cfg = salt['grains.filter_by']({
+    'default': cfg,
+}, default='default', merge=controller) %}
+
+{%- endif %}
+
+
+{% set api = salt['grains.filter_by']({
+    'Debian': {
+        'pkgs': ['nova-api'],
+        'service': 'nova-api',
+    }
+}, merge=pillar.nova.get('api', {})) %}
+
+{%- if api.get('enabled', False) %}
+
+{% set cfg = salt['grains.filter_by']({
+    'default': cfg,
+}, default='default', merge=api) %}
+
+{%- endif %}
+
+
+{% set scheduler = salt['grains.filter_by']({
+    'Debian': {
+      'pkgs': ['nova-scheduler'],
+      'service': 'nova-scheduler',
+    }
+
+}, merge=pillar.nova.get('scheduler', {})) %}
+
+{%- if scheduler.get('enabled', False) %}
+
+{% set cfg = salt['grains.filter_by']({
+    'default': cfg,
+}, default='default', merge=scheduler) %}
+
+{%- endif %}
+
+
+{% set cert_service = salt['grains.filter_by']({
+    'Debian': {
+        'pkgs': ['nova-cert'],
+        'service': 'nova-cert',
+    },
+}, merge=pillar.nova.get('cert_service', {})) %}
+
+{%- if cert_service.get('enabled', False) %}
+
+{% set cfg = salt['grains.filter_by']({
+    'default': cfg,
+}, default='default', merge=cert_service) %}
+
+{%- endif %}
+
+
+{% set conductor = salt['grains.filter_by']({
+    'Debian': {
+        'pkgs': ['nova-conductor'],
+        'service': 'nova-conductor',
+    },
+}, merge=pillar.nova.get('conductor', {})) %}
+
+{%- if conductor.get('enabled', False) %}
+
+{% set cfg = salt['grains.filter_by']({
+    'default': cfg,
+}, default='default', merge=conductor) %}
+
+{%- endif %}
+
+
+{% set consoleauth = salt['grains.filter_by']({
+    'Debian': {
+        'pkgs': ['nova-consoleauth'],
+        'service': 'nova-consoleauth',
+    },
+}, merge=pillar.nova.get('consoleauth', {})) %}
+
+{%- if consoleauth.get('enabled', False) %}
+
+{% set cfg = salt['grains.filter_by']({
+    'default': cfg,
+}, default='default', merge=consoleauth) %}
+
+{%- endif %}
+
+
+{% set consoleproxy = salt['grains.filter_by']({
+    'Debian': {
+        'pkgs': ['nova-consoleproxy', 'novnc'],
+        'service': 'nova-novncproxy',
+    },
+}, merge=pillar.nova.get('consoleproxy', {})) %}
+
+{%- if consoleproxy.get('enabled', False) %}
+
+{% set cfg = salt['grains.filter_by']({
+    'default': cfg,
+}, default='default', merge=consoleproxy) %}
+
+{%- endif %}
+
+
+{% set placement = salt['grains.filter_by']({
+    'Debian': {
+        'pkgs': ['nova-placement-api'],
+        'service': 'apache2',
+    },
+}, merge=pillar.nova.get('placement', {})) %}
+
+
+{%- if placement.get('enabled', False) %}
+
+{% set cfg = salt['grains.filter_by']({
+    'default': cfg,
+}, default='default', merge=placement) %}
+
+{%- endif %}
+

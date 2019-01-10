@@ -1,13 +1,19 @@
-{% from "nova/map.jinja" import controller, compute with context %}
+{% from "nova/map.jinja" import cfg, controller, compute with context %}
 
 {%- if controller.get('enabled') %}
   {%- set nova_msg = controller.message_queue %}
   {%- set nova_cacert = controller.cacert_file %}
   {%- set role = 'controller' %}
 {%- else %}
-  {%- set nova_msg = compute.message_queue %}
-  {%- set nova_cacert = compute.cacert_file %}
-  {%- set role = 'compute' %}
+  {%- if compute.get('enabled') %}
+    {%- set nova_msg = compute.message_queue %}
+    {%- set nova_cacert = compute.cacert_file %}
+    {%- set role = 'compute' %}
+  {%- else %}
+    {%- set nova_msg = cfg.message_queue %}
+    {%- set nova_cacert = cfg.cacert_file %}
+    {%- set role = 'common' %}
+  {%- endif %}
 {%- endif %}
 
 nova_{{ role }}_ssl_rabbitmq:
