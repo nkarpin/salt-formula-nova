@@ -1,6 +1,7 @@
-{% from "nova/map.jinja" import controller with context %}
+{% from "nova/map.jinja" import cfg,controller,api with context %}
 
-{%- if controller.version not in ["juno", "kilo", "liberty"] %}
+{%- if controller.get('enabled') or api.get('enabled') %}
+  {%- if controller.version not in ["juno", "kilo", "liberty"] %}
 nova_controller_sync_apidb:
   cmd.run:
   - name: nova-manage api_db sync
@@ -10,11 +11,9 @@ nova_controller_sync_apidb:
   - runas: 'nova'
   - require_in:
     - nova_controller_syncdb
+  {%- endif %}
 
-{%- endif %}
-
-{%- if controller.version not in ["juno", "kilo", "liberty", "mitaka", "newton"] %}
-
+  {%- if cfg.version not in ["juno", "kilo", "liberty", "mitaka", "newton"] %}
 nova_controller_map_cell0:
   cmd.run:
   - name: nova-manage cell_v2 map_cell0
@@ -38,12 +37,13 @@ nova_cell1_create:
   - require_in:
     - nova_controller_syncdb
 
+  {%- endif %}
 {%- endif %}
 
 nova_controller_syncdb:
   cmd.run:
   - name: nova-manage db sync
-  {%- if grains.get('noservices') or controller.get('role', 'primary') == 'secondary' %}
+  {%- if grains.get('noservices') or cfg.get('role', 'primary') == 'secondary' %}
   - onlyif: /bin/false
   {%- endif %}
   - runas: 'nova'
