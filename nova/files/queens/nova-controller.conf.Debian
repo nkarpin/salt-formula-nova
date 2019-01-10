@@ -1,4 +1,4 @@
-{%- from "nova/map.jinja" import controller,compute_driver_mapping with context %}
+{%- from "nova/map.jinja" import cfg,api,controller,consoleauth,compute_driver_mapping with context %}
 [DEFAULT]
 
 #
@@ -161,7 +161,7 @@ rootwrap_config = /etc/nova/rootwrap.conf
 # * ``powervm.PowerVMDriver``
 #  (string value)
 #compute_driver = <None>
-compute_driver = {{ controller.get('compute_driver', 'libvirt.LibvirtDriver') }}
+compute_driver = {{ cfg.get('compute_driver', 'libvirt.LibvirtDriver') }}
 
 #
 # Allow destination machine to match source for resize. Useful when
@@ -303,7 +303,7 @@ allow_resize_to_same_host = true
 # * False: Instances should continue booting after VIF plugging
 # timeout
 #  (boolean value)
-vif_plugging_is_fatal = {{ controller.get('vif_plugging_is_fatal', 'true') }}
+vif_plugging_is_fatal = {{ cfg.get('vif_plugging_is_fatal', 'true') }}
 
 #
 # Timeout for Neutron VIF plugging event message arrival.
@@ -320,7 +320,7 @@ vif_plugging_is_fatal = {{ controller.get('vif_plugging_is_fatal', 'true') }}
 #   arrive at all.
 #  (integer value)
 # Minimum value: 0
-vif_plugging_timeout = {{ controller.get('vif_plugging_timeout', '300') }}
+vif_plugging_timeout = {{ cfg.get('vif_plugging_timeout', '300') }}
 
 # Path to '/etc/network/interfaces' template.
 #
@@ -586,8 +586,8 @@ remove_unused_original_minimum_age_seconds = 86400
 #  (floating point value)
 # Minimum value: 0
 #cpu_allocation_ratio = 0.0
-{%- if controller.cpu_allocation_ratio is defined %}
-cpu_allocation_ratio = {{ controller.cpu_allocation_ratio }}
+{%- if cfg.cpu_allocation_ratio is defined %}
+cpu_allocation_ratio = {{ cfg.cpu_allocation_ratio }}
 {%- else  %}
 #cpu_allocation_ratio=0.0
 {%- endif %}
@@ -619,8 +619,8 @@ cpu_allocation_ratio = {{ controller.cpu_allocation_ratio }}
 #  (floating point value)
 # Minimum value: 0
 #ram_allocation_ratio = 0.0
-{%- if controller.ram_allocation_ratio is defined %}
-ram_allocation_ratio = {{ controller.ram_allocation_ratio }}
+{%- if cfg.ram_allocation_ratio is defined %}
+ram_allocation_ratio = {{ cfg.ram_allocation_ratio }}
 {%- else  %}
 #ram_allocation_ratio=0.0
 {%- endif %}
@@ -707,8 +707,8 @@ ram_allocation_ratio = {{ controller.ram_allocation_ratio }}
 # notifications are consumed by OpenStack Telemetry service.
 #  (boolean value)
 #instance_usage_audit = false
-{% if controller.instance_usage_audit is defined %}
-instance_usage_audit = {{ controller.instance_usage_audit }}
+{% if cfg.instance_usage_audit is defined %}
+instance_usage_audit = {{ cfg.instance_usage_audit }}
 {%- endif %}
 
 #
@@ -734,7 +734,7 @@ instance_usage_audit = {{ controller.instance_usage_audit }}
 # compute node
 # resume their state each time the compute node boots or restarts.
 #  (boolean value)
-#resume_guests_state_on_host_boot = {{ controller.get('resume_guests_state_on_host_boot', True) }}
+#resume_guests_state_on_host_boot = {{ cfg.get('resume_guests_state_on_host_boot', True) }}
 
 #
 # Number of times to retry network allocation. It is required to
@@ -801,7 +801,7 @@ instance_usage_audit = {{ controller.instance_usage_audit }}
 # * Any negative value is treated as 0.
 # * For any value > 0, total attempts are (value + 1)
 #  (integer value)
-block_device_allocate_retries = {{ controller.get('block_device_allocate_retries', '600') }}
+block_device_allocate_retries = {{ cfg.get('block_device_allocate_retries', '600') }}
 
 #
 # Number of greenthreads available for use to sync power states.
@@ -916,8 +916,8 @@ block_device_allocate_retries = {{ controller.get('block_device_allocate_retries
 # * Any value <=0 will disable the option.
 #  (integer value)
 #reclaim_instance_interval = 0
-{%- if controller.reclaim_instance_interval is defined %}
-reclaim_instance_interval = {{ controller.reclaim_instance_interval }}
+{%- if cfg.reclaim_instance_interval is defined %}
+reclaim_instance_interval = {{ cfg.reclaim_instance_interval }}
 {%- endif %}
 
 #
@@ -1015,7 +1015,7 @@ reclaim_instance_interval = {{ controller.reclaim_instance_interval }}
 # * ``block_device_allocate_retries`` in compute_manager_opts group.
 #  (integer value)
 # Minimum value: 0
-block_device_allocate_retries_interval = {{ controller.get('block_device_allocate_retries_interval', '10') }}
+block_device_allocate_retries_interval = {{ cfg.get('block_device_allocate_retries_interval', '10') }}
 
 #
 # Interval between sending the scheduler a list of current instance
@@ -1466,7 +1466,7 @@ block_device_allocate_retries_interval = {{ controller.get('block_device_allocat
 # * vpn_ip
 #  (string value)
 #my_ip = <host_ipv4>
-my_ip={{ controller.bind.private_address }}
+my_ip={{ cfg.bind.private_address }}
 
 #
 # The IP address which is used to connect to the block storage
@@ -1502,8 +1502,8 @@ my_ip={{ controller.bind.private_address }}
 # this host.
 #  (string value)
 #host = <current_hostname>
-{%- if controller.host is defined %}
-host={{ controller.host }}
+{%- if cfg.host is defined %}
+host={{ cfg.host }}
 {%- endif %}
 
 # DEPRECATED:
@@ -2458,7 +2458,7 @@ use_neutron = true
 # Reason:
 # nova-network is deprecated, as are any related configuration
 # options.
-force_dhcp_release = {{ controller.get('force_dhcp_release', 'true') }}
+force_dhcp_release = {{ cfg.get('force_dhcp_release', 'true') }}
 
 # DEPRECATED:
 # When this option is True, whenever a DNS entry must be updated, a
@@ -2517,7 +2517,7 @@ force_dhcp_release = {{ controller.get('force_dhcp_release', 'true') }}
 # nova-network is deprecated, as are any related configuration
 # options.
 #dhcp_domain = novalocal
-dhcp_domain={{ controller.get('dhcp_domain', 'novalocal') }}
+dhcp_domain={{ cfg.get('dhcp_domain', 'novalocal') }}
 
 # DEPRECATED:
 # This option allows you to specify the L3 management library to be
@@ -3031,10 +3031,10 @@ firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 # Disallow non-encrypted connections. (boolean value)
 #ssl_only = false
-{%- if controller.novncproxy.tls.get('enabled', False) %}
+{%- if cfg.novncproxy.tls.get('enabled', False) %}
 ssl_only=True
-cert={{controller.novncproxy.tls.server.cert_file|yaml_squote}}
-key={{controller.novncproxy.tls.server.key_file|yaml_squote}}
+cert={{cfg.novncproxy.tls.server.cert_file|yaml_squote}}
+key={{cfg.novncproxy.tls.server.key_file|yaml_squote}}
 {%- endif %}
 
 # Set to True if source host is addressed with IPv6. (boolean value)
@@ -3128,7 +3128,7 @@ state_path = /var/lib/nova
 #   because they report in too rarely.
 #  (integer value)
 #report_interval = 10
-report_interval = {{ controller.get('report_interval', '60') }}
+report_interval = {{ cfg.get('report_interval', '60') }}
 
 #
 # Maximum time in seconds since last check-in for up service
@@ -3145,7 +3145,7 @@ report_interval = {{ controller.get('report_interval', '60') }}
 # * report_interval (service_down_time should not be less than
 # report_interval)
 #  (integer value)
-service_down_time = {{ controller.service_down_time|default('180') }}
+service_down_time = {{ cfg.service_down_time|default('180') }}
 
 #
 # Enable periodic tasks.
@@ -3199,7 +3199,7 @@ enabled_apis = osapi_compute,metadata
 # requests.
 #  (string value)
 #osapi_compute_listen = 0.0.0.0
-osapi_compute_listen = {{ controller.bind.private_address }}
+osapi_compute_listen = {{ cfg.bind.private_address }}
 
 #
 # Port on which the OpenStack API will listen.
@@ -3231,7 +3231,7 @@ osapi_compute_listen = {{ controller.bind.private_address }}
 #  (integer value)
 # Minimum value: 1
 #osapi_compute_workers = <None>
-osapi_compute_workers = {{ controller.workers }}
+osapi_compute_workers = {{ cfg.workers }}
 
 #
 # IP address on which the metadata API will listen.
@@ -3240,7 +3240,7 @@ osapi_compute_workers = {{ controller.workers }}
 # requests.
 #  (string value)
 #metadata_listen = 0.0.0.0
-metadata_listen={{ controller.get('metadata', {}).get('bind', {}).get('address', controller.bind.private_address) }}
+metadata_listen={{ cfg.get('metadata', {}).get('bind', {}).get('address', cfg.bind.private_address) }}
 
 #
 # Port on which the metadata API will listen.
@@ -3251,8 +3251,8 @@ metadata_listen={{ controller.get('metadata', {}).get('bind', {}).get('address',
 # Minimum value: 0
 # Maximum value: 65535
 #metadata_listen_port = 8775
-{%- if controller.get('metadata', {}).get('bind', {}).port is defined %}
-metadata_listen_port={{ controller.metadata.bind.port }}
+{%- if cfg.get('metadata', {}).get('bind', {}).port is defined %}
+metadata_listen_port={{ cfg.metadata.bind.port }}
 {%- else %}
 #metadata_listen_port=8775
 {%- endif %}
@@ -3277,7 +3277,7 @@ metadata_listen_port={{ controller.metadata.bind.port }}
 #  (integer value)
 # Minimum value: 1
 #metadata_workers = <None>
-metadata_workers = {{ controller.workers }}
+metadata_workers = {{ cfg.workers }}
 
 # Full class name for the Manager for network (string value)
 # Possible values:
@@ -3355,12 +3355,12 @@ metadata_workers = {{ controller.workers }}
 # exit. Zero value means endless wait. (integer value)
 #graceful_shutdown_timeout = 60
 
-{%- if controller.logging is defined %}
-{%- set _data = controller.logging %}
+{%- if cfg.logging is defined %}
+{%- set _data = cfg.logging %}
 {%- include "oslo_templates/files/queens/oslo/_log.conf" %}
 {%- endif %}
 
-{%- set _data = controller.message_queue %}
+{%- set _data = cfg.message_queue %}
 {%- include "oslo_templates/files/queens/oslo/messaging/_default.conf" %}
 
 [api]
@@ -3597,7 +3597,7 @@ auth_strategy = keystone
 # Minimum value: 0
 # Deprecated group/name - [DEFAULT]/osapi_max_limit
 #max_limit = 1000
-max_limit={{ controller.osapi_max_limit|default('1000') }}
+max_limit={{ cfg.osapi_max_limit|default('1000') }}
 
 #
 # This string is prepended to the normal URL that is returned in links
@@ -3714,18 +3714,19 @@ fping_path = /usr/sbin/fping
 #  (boolean value)
 #enable_instance_password = true
 
-
+{%- if controller.get('enabled') or api.get('enabled') %}
 [api_database]
-{%- set _data = {} %}
-{%- do _data.update(controller.database) %}
-{%- do _data.update({'name': 'nova_api'}) %}
-{%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': controller.cacert_file}) %}{% endif %}
-{%- include "oslo_templates/files/queens/oslo/_database.conf" %}
+  {%- set _data = {} %}
+  {%- do _data.update(cfg.database) %}
+  {%- do _data.update({'name': 'nova_api'}) %}
+  {%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': cfg.cacert_file}) %}{% endif %}
+  {%- include "oslo_templates/files/queens/oslo/_database.conf" %}
+{%- endif %}
 
-{%- if controller.get('barbican', {}).get('enabled', False) %}
-{%- set _data = controller.identity %}
+{%- if cfg.get('barbican', {}).get('enabled', False) %}
+  {%- set _data = cfg.identity %}
 [barbican]
-{%- include "oslo_templates/files/queens/castellan/_barbican.conf" %}
+  {%- include "oslo_templates/files/queens/castellan/_barbican.conf" %}
 {%- endif %}
 
 [cache]
@@ -3733,10 +3734,10 @@ fping_path = /usr/sbin/fping
 #
 # From nova.conf
 #
-{%- if controller.cache is defined %}
+{%- if cfg.cache is defined %}
 backend = oslo_cache.memcache_pool
 enabled = true
-memcache_servers={%- for member in controller.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
+memcache_servers={%- for member in cfg.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
 {%- endif %}
 
 # Prefix for building the configuration dictionary for the cache
@@ -4410,7 +4411,7 @@ catalog_info = volumev3:cinderv3:internalURL
 # * Any string representing region name
 #  (string value)
 #os_region_name = <None>
-os_region_name = {{ controller.identity.region }}
+os_region_name = {{ cfg.identity.region }}
 
 #
 # Number of times cinderclient should retry on any failed http call.
@@ -4448,12 +4449,12 @@ os_region_name = {{ controller.identity.region }}
 # attach.
 #  (boolean value)
 #cross_az_attach = true
-{%- if controller.cross_az_attach is defined %}
-cross_az_attach={{ controller.cross_az_attach }}
+{%- if cfg.cross_az_attach is defined %}
+cross_az_attach={{ cfg.cross_az_attach }}
 {%- endif %}
 
-{%- set _data = controller.get('cinder', controller.get('identity', {})) %}
-{%- if 'cacert_file' not in _data.keys() %}{% do _data.update({'cacert_file': controller.cacert_file}) %}{% endif %}
+{%- set _data = cfg.get('cinder', cfg.get('identity', {})) %}
+{%- if 'cacert_file' not in _data.keys() %}{% do _data.update({'cacert_file': cfg.cacert_file}) %}{% endif %}
 {%- set auth_type = _data.get('auth_type', 'password') %}
 {%- include "oslo_templates/files/queens/keystoneauth/_type_" + auth_type + ".conf" %}
 
@@ -4487,8 +4488,7 @@ cross_az_attach={{ controller.cross_az_attach }}
 # be the
 # number of CPUs available.
 #  (integer value)
-
-workers = {{ controller.get('conductor', {}).get('workers', controller.workers) }}
+workers = {{ cfg.get('conductor', {}).get('workers', cfg.workers) }}
 
 
 [console]
@@ -4538,16 +4538,18 @@ workers = {{ controller.get('conductor', {}).get('workers', controller.workers) 
 # Minimum value: 0
 # Deprecated group/name - [DEFAULT]/console_token_ttl
 #token_ttl = 600
-{% if controller.consoleauth_token_ttl is defined %}
-{%- set token_ttl = controller.consoleauth_token_ttl %}
+{% if cfg.consoleauth_token_ttl is defined %}
+{%- set token_ttl = cfg.consoleauth_token_ttl %}
 token_ttl = {{ token_ttl }}
-{%- elif controller.get('consoleauth', {}).token_ttl is defined %}
-token_ttl = {{ controller.consoleauth.token_ttl }}
+{%- elif cfg.get('consoleauth', {}).token_ttl is defined %}
+token_ttl = {{ cfg.consoleauth.token_ttl }}
+{%- elif consoleauth.token_ttl is defined %}
+token_ttl = {{ consoleauth.token_ttl }}
 {% endif %}
 
 [cors]
-{%- if controller.cors is defined %}
-{%- set _data = controller.cors %}
+{%- if cfg.cors is defined %}
+{%- set _data = cfg.cors %}
 {%- include "oslo_templates/files/queens/oslo/_cors.conf" %}
 {%- endif %}
 
@@ -4843,7 +4845,7 @@ max_instances_per_host = 50
 #available_filters = nova.scheduler.filters.all_filters
 available_filters=nova.scheduler.filters.all_filters
 available_filters=nova.scheduler.filters.pci_passthrough_filter.PciPassthroughFilter
-{% for filter in controller.get('scheduler_custom_filters', []) %}
+{% for filter in cfg.get('scheduler_custom_filters', []) %}
 scheduler_available_filters = {{ filter }}
 {% endfor %}
 
@@ -4876,7 +4878,7 @@ scheduler_available_filters = {{ filter }}
 #  (list value)
 # Deprecated group/name - [DEFAULT]/scheduler_default_filters
 #enabled_filters = RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter
-{%- set _enabled_filters = controller.scheduler_default_filters if controller.scheduler_default_filters is string else controller.scheduler_default_filters|unique|sort|join(',') %}
+{%- set _enabled_filters = cfg.scheduler_default_filters if cfg.scheduler_default_filters is string else cfg.scheduler_default_filters|unique|sort|join(',') %}
 enabled_filters = {{ _enabled_filters }}
 
 # DEPRECATED:
@@ -5348,7 +5350,7 @@ enabled_filters = {{ _enabled_filters }}
 #   (i.e. "http://10.0.1.0:9292" or "https://my.glance.server/image").
 #  (list value)
 #api_servers = <None>
-api_servers = {{ controller.glance.get('protocol', 'http') }}://{{ controller.glance.host }}:{{ controller.glance.get('port', 9292) }}
+api_servers = {{ cfg.glance.get('protocol', 'http') }}://{{ cfg.glance.host }}:{{ cfg.glance.get('port', 9292) }}
 
 #
 # Enable glance operation retries.
@@ -5406,7 +5408,7 @@ api_servers = {{ controller.glance.get('protocol', 'http') }}://{{ controller.gl
 # default_trusted_certificate_ids
 #   below depend on this option being enabled.
 #  (boolean value)
-{%- if controller.get('barbican', {}).get('enabled', False) %}
+{%- if cfg.get('barbican', {}).get('enabled', False) %}
 verify_glance_signatures=true
 {%- else %}
 #verify_glance_signatures=false
@@ -5875,7 +5877,7 @@ verify_glance_signatures=true
 #  (list value)
 #iscsi_initiator_list =
 
-{% if controller.ironic is defined -%}
+{% if cfg.ironic is defined -%}
 [ironic]
 #
 # Configuration options for Ironic driver (Bare Metal).
@@ -5901,7 +5903,7 @@ verify_glance_signatures=true
 # removed in a future release. To achieve the same result, use the
 # endpoint_override option instead.
 #api_endpoint = http://ironic.example.org:6385/
-api_endpoint={{ controller.ironic.get('protocol', 'http') }}://{{ controller.ironic.host }}:{{ controller.ironic.port }}
+api_endpoint={{ cfg.ironic.get('protocol', 'http') }}://{{ cfg.ironic.host }}:{{ cfg.ironic.port }}
 
 #
 # The number of times to retry when a request conflicts.
@@ -5932,8 +5934,8 @@ api_endpoint={{ controller.ironic.get('protocol', 'http') }}://{{ controller.iro
 # PEM encoded Certificate Authority to use when verifying HTTPs
 # connections. (string value)
 #cafile = <None>
-{%- if controller.ironic.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+{%- if cfg.ironic.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 
 # PEM encoded client certificate cert file (string value)
@@ -5951,7 +5953,7 @@ cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
 # Authentication type to load (string value)
 # Deprecated group/name - [ironic]/auth_plugin
 #auth_type = <None>
-auth_type={{ controller.ironic.auth_type }}
+auth_type={{ cfg.ironic.auth_type }}
 
 # Config Section from which to load plugin specific options (string
 # value)
@@ -5959,7 +5961,7 @@ auth_type={{ controller.ironic.auth_type }}
 
 # Authentication URL (string value)
 #auth_url = <None>
-auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:{{ controller.identity.port }}/v3
+auth_url={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:{{ cfg.identity.port }}/v3
 
 # Scope for system operations (string value)
 #system_scope = <None>
@@ -5975,14 +5977,14 @@ auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.ident
 
 # Project name to scope to (string value)
 #project_name = <None>
-project_name={{ controller.identity.tenant }}
+project_name={{ cfg.identity.tenant }}
 
 # Domain ID containing project (string value)
 #project_domain_id = <None>
 
 # Domain name containing project (string value)
 #project_domain_name = <None>
-project_domain_name={{ controller.ironic.project_domain_name }}
+project_domain_name={{ cfg.ironic.project_domain_name }}
 
 # Trust ID (string value)
 #trust_id = <None>
@@ -5993,19 +5995,19 @@ project_domain_name={{ controller.ironic.project_domain_name }}
 # Username (string value)
 # Deprecated group/name - [ironic]/user_name
 #username = <None>
-username={{ controller.ironic.user }}
+username={{ cfg.ironic.user }}
 
 # User's domain id (string value)
 #user_domain_id = <None>
 
 # User's domain name (string value)
 #user_domain_name = <None>
-user_domain_name={{ controller.ironic.user_domain_name }}
+user_domain_name={{ cfg.ironic.user_domain_name }}
 
 
 # User's password (string value)
 #password = <None>
-password={{ controller.ironic.password }}
+password={{ cfg.ironic.password }}
 # The default service_type for endpoint URL discovery. (string value)
 #service_type = baremetal
 
@@ -6042,7 +6044,7 @@ password={{ controller.ironic.password }}
 # * Empty string or a key in hex value
 #  (string value)
 #fixed_key = <None>
-{%- if controller.get('barbican', {}).get('enabled', False) %}
+{%- if cfg.get('barbican', {}).get('enabled', False) %}
 api_class=castellan.key_manager.barbican_key_manager.BarbicanKeyManager
 {%- endif %}
 
@@ -6718,8 +6720,8 @@ use_usb_tablet = true
 #     * live_migration_permit_post_copy
 #  (boolean value)
 #live_migration_permit_auto_converge = false
-{%- if controller.get('libvirt', {}).live_migration_permit_auto_converge is defined %}
-live_migration_permit_auto_converge={{ controller.libvirt.live_migration_permit_auto_converge|lower }}
+{%- if cfg.get('libvirt', {}).live_migration_permit_auto_converge is defined %}
+live_migration_permit_auto_converge={{ cfg.libvirt.live_migration_permit_auto_converge|lower }}
 {%- endif %}
 
 #
@@ -6807,8 +6809,8 @@ live_migration_permit_auto_converge={{ controller.libvirt.live_migration_permit_
 # custom - <No description provided>
 # none - <No description provided>
 # cpu_model = <None>
-{%- if controller.cpu_mode is defined %}
-cpu_mode = {{ controller.cpu_mode }}
+{%- if cfg.cpu_mode is defined %}
+cpu_mode = {{ cfg.cpu_mode }}
 {%- endif %}
 
 #
@@ -6830,8 +6832,8 @@ cpu_mode = {{ controller.cpu_mode }}
 # use this.
 #  (string value)
 #cpu_model = <None>
-{%- if controller.get('libvirt', {}).cpu_model is defined and controller.cpu_mode == 'custom' %}
-cpu_model = {{ controller.libvirt.cpu_model }}
+{%- if cfg.get('libvirt', {}).cpu_model is defined and cfg.cpu_mode == 'custom' %}
+cpu_model = {{ cfg.libvirt.cpu_model }}
 {%- endif %}
 
 
@@ -7300,8 +7302,8 @@ use_virtio_for_bridges = true
 # * Any string representing mount options separated by commas.
 # * Example string: vers=3,lookupcache=pos
 #  (string value)
-{%- if controller.nfs_mount_options is defined %}
-nfs_mount_options="{{ controller.nfs_mount_options }}"
+{%- if cfg.nfs_mount_options is defined %}
+nfs_mount_options="{{ cfg.nfs_mount_options }}"
 {%- endif %}
 
 #
@@ -7730,13 +7732,13 @@ service_metadata_proxy=True
 # * service_metadata_proxy
 #  (string value)
 #metadata_proxy_shared_secret =
-metadata_proxy_shared_secret = {{ controller.metadata.password }}
+metadata_proxy_shared_secret = {{ cfg.metadata.password }}
 
 # PEM encoded Certificate Authority to use when verifying HTTPs
 # connections. (string value)
 #cafile = <None>
-{%- if controller.network.get('protocol', 'http') == 'https' %}
-cafile={{ controller.network.get('cacert_file', controller.cacert_file) }}
+{%- if cfg.network.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.network.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 
 # PEM encoded client certificate cert file (string value)
@@ -7763,7 +7765,7 @@ auth_type = v3password
 
 # Authentication URL (string value)
 #auth_url = <None>
-auth_url = {{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:{{ controller.identity.port }}/v3
+auth_url = {{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:{{ cfg.identity.port }}/v3
 
 # Scope for system operations (string value)
 #system_scope = <None>
@@ -7785,7 +7787,7 @@ auth_url = {{ controller.identity.get('protocol', 'http') }}://{{ controller.ide
 
 # Domain name containing project (string value)
 #project_domain_name = <None>
-project_domain_name = {{ controller.get('project_domain_name', 'Default') }}
+project_domain_name = {{ cfg.get('project_domain_name', 'Default') }}
 
 # Trust ID (string value)
 #trust_id = <None>
@@ -7812,7 +7814,7 @@ project_domain_name = {{ controller.get('project_domain_name', 'Default') }}
 
 # User's domain name (string value)
 #user_domain_name = <None>
-user_domain_name = {{ controller.get('user_domain_name', 'Default') }}
+user_domain_name = {{ cfg.get('user_domain_name', 'Default') }}
 
 # User's password (string value)
 #password = <None>
@@ -7847,10 +7849,10 @@ project_name = {{ pillar.neutron.server.identity.tenant }}
 username = {{ pillar.neutron.server.identity.user }}
 region_name = {{ pillar.neutron.server.identity.region }}
 {%- else %}
-password = {{ controller.network.password }}
-project_name = {{ controller.network.tenant }}
-username = {{ controller.network.user }}
-region_name = {{ controller.network.region }}
+password = {{ cfg.network.password }}
+project_name = {{ cfg.network.tenant }}
+username = {{ cfg.network.user }}
+region_name = {{ cfg.network.region }}
 {%- endif %}
 
 
@@ -7896,8 +7898,8 @@ region_name = {{ controller.network.region }}
 # vm_state - <No description provided>
 # vm_and_task_state - <No description provided>
 #notify_on_state_change = <None>
-{%- if controller.get('notification', {}).notify_on is defined %}
-{%- for key, value in controller.notification.notify_on.iteritems() %}
+{%- if cfg.get('notification', {}).notify_on is defined %}
+{%- for key, value in cfg.notification.notify_on.iteritems() %}
 notify_on_{{ key }} = {{ value }}
 {%- endfor %}
 {%- endif %}
@@ -8087,8 +8089,8 @@ notify_on_api_faults=false
 #  (multi valued)
 # Deprecated group/name - [DEFAULT]/pci_alias
 #alias =
-{%- if controller.get('pci', {}).get('alias', false) %}
-  {%- for alias_name, alias in controller.pci.alias.iteritems() %}
+{%- if cfg.get('pci', {}).get('alias', false) %}
+  {%- for alias_name, alias in cfg.pci.alias.iteritems() %}
 alias = {{ alias | json }}
   {%- endfor %}
 {%- endif %}
@@ -8168,23 +8170,23 @@ alias = {{ alias | json }}
 #  (multi valued)
 # Deprecated group/name - [DEFAULT]/pci_passthrough_whitelist
 #passthrough_whitelist =
-{%- if controller.get('sriov', false) %}
-{%- for nic_name, sriov in controller.sriov.iteritems() %}
+{%- if cfg.get('sriov', false) %}
+{%- for nic_name, sriov in cfg.sriov.iteritems() %}
 passthrough_whitelist = {"devname":"{{ sriov.devname }}","physical_network":"{{ sriov.physical_network }}"}
 {%- endfor %}
 {%- endif %}
 
 [placement]
 
-{%- set _data = controller.identity %}
+{%- set _data = cfg.identity %}
 {%- set auth_type = _data.get('auth_type', 'password') %}
-{%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': controller.cacert_file}) %}{% endif %}
+{%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': cfg.cacert_file}) %}{% endif %}
 {%- include "oslo_templates/files/queens/keystoneauth/_type_" + auth_type + ".conf" %}
 
 # List of interfaces, in order of preference, for endpoint URL. (list
 # value)
 # Deprecated group/name - [placement]/os_interface
-valid_interfaces = {{ controller.identity.get('valid_interfaces', 'internal') }}
+valid_interfaces = {{ cfg.identity.get('valid_interfaces', 'internal') }}
 
 # Always use this endpoint URL for requests for this client. NOTE: The
 # unversioned endpoint should be specified here; to request a
@@ -9139,8 +9141,8 @@ enabled = false
 #   and port where the ``nova-spicehtml5proxy`` service is listening.
 #  (uri value)
 #html5proxy_base_url = http://127.0.0.1:6082/spice_auto.html
-{%- if controller.vncproxy_url is defined %}
-html5proxy_base_url = {{ controller.vncproxy_url }}/spice_auto.html
+{%- if cfg.vncproxy_url is defined %}
+html5proxy_base_url = {{ cfg.vncproxy_url }}/spice_auto.html
 {%- endif %}
 
 #
@@ -9228,8 +9230,8 @@ html5proxy_base_url = {{ controller.vncproxy_url }}/spice_auto.html
 
 [upgrade_levels]
 
-{%- if controller.upgrade_levels is defined %}
-{%- for key, value in controller.upgrade_levels.iteritems() %}
+{%- if cfg.upgrade_levels is defined %}
+{%- for key, value in cfg.upgrade_levels.iteritems() %}
 {{ key }}={{ value }}
 {%- endfor %}
 {%- endif %}
@@ -9420,9 +9422,9 @@ html5proxy_base_url = {{ controller.vncproxy_url }}/spice_auto.html
 # Tenant Name (string value)
 #tenant_name = <None>
 
-{%- set compute_driver = controller.get('compute_driver', 'libvirt.LibvirtDriver') %}
+{%- set compute_driver = cfg.get('compute_driver', 'libvirt.LibvirtDriver') %}
 {%- if compute_driver in compute_driver_mapping.keys() %}
-{%- set _data = controller.get(compute_driver_mapping[compute_driver]) %}
+{%- set _data = cfg.get(compute_driver_mapping[compute_driver]) %}
 {%- include "nova/files/queens/compute/_" + compute_driver_mapping[compute_driver] + ".conf" %}
 {%- endif %}
 
@@ -9446,20 +9448,20 @@ html5proxy_base_url = {{ controller.vncproxy_url }}/spice_auto.html
 # Deprecated group/name - [DEFAULT]/vnc_enabled
 enabled = true
 
-novncproxy_host = {{ controller.bind.get('novncproxy_address', '0.0.0.0') }}
-novncproxy_base_url = {{ controller.vncproxy_url }}/vnc_auto.html
-novncproxy_port={{ controller.bind.get('vncproxy_port', '6080') }}
+novncproxy_host = {{ cfg.bind.get('novncproxy_address', '0.0.0.0') }}
+novncproxy_base_url = {{ cfg.vncproxy_url }}/vnc_auto.html
+novncproxy_port={{ cfg.bind.get('vncproxy_port', '6080') }}
 {%- if pillar.nova.compute is defined %}
-vncserver_listen={{ controller.bind.private_address }}
-vncserver_proxyclient_address={{ controller.bind.private_address }}
+vncserver_listen={{ cfg.bind.private_address }}
+vncserver_proxyclient_address={{ cfg.bind.private_address }}
 {%- else %}
-vncserver_listen={{ controller.bind.get('novncproxy_address', '0.0.0.0') }}
+vncserver_listen={{ cfg.bind.get('novncproxy_address', '0.0.0.0') }}
 {%- endif %}
-{%- if controller.novncproxy.vencrypt.tls.get('enabled', False) %}
+{%- if cfg.novncproxy.vencrypt.tls.get('enabled', False) %}
 auth_schemes=vencrypt
-vencrypt_client_key={{controller.novncproxy.vencrypt.tls.key_file|yaml_squote}}
-vencrypt_client_cert={{controller.novncproxy.vencrypt.tls.cert_file|yaml_squote}}
-vencrypt_ca_certs={{controller.novncproxy.vencrypt.tls.ca_file|yaml_squote}}
+vencrypt_client_key={{cfg.novncproxy.vencrypt.tls.key_file|yaml_squote}}
+vencrypt_client_cert={{cfg.novncproxy.vencrypt.tls.cert_file|yaml_squote}}
+vencrypt_ca_certs={{cfg.novncproxy.vencrypt.tls.ca_file|yaml_squote}}
 {%- endif %}
 
 #
@@ -9478,7 +9480,7 @@ vencrypt_ca_certs={{controller.novncproxy.vencrypt.tls.ca_file|yaml_squote}}
 #   of supported keyboard layouts at ``/usr/share/qemu/keymaps``.
 #  (string value)
 # Deprecated group/name - [DEFAULT]/vnc_keymap
-keymap = {{ controller.get('vnc_keymap', 'en-us') }}
+keymap = {{ cfg.get('vnc_keymap', 'en-us') }}
 
 #
 # The IP address or hostname on which an instance should listen to for
@@ -9742,7 +9744,7 @@ keymap = {{ controller.get('vnc_keymap', 'en-us') }}
 #   there is a new enough libvirt and the backend storage supports it)
 #  (boolean value)
 #disable_libvirt_livesnapshot = false
-disable_libvirt_livesnapshot = {{ controller.get('workaround', {}).get('disable_libvirt_livesnapshot', True)|lower }}
+disable_libvirt_livesnapshot = {{ cfg.get('workaround', {}).get('disable_libvirt_livesnapshot', True)|lower }}
 
 #
 # Enable handling of events emitted from compute drivers.
@@ -10233,8 +10235,8 @@ api_paste_config = /etc/nova/api-paste.ini
 # value)
 # Minimum value: 1
 #block_device_creation_timeout = 10
-{%- if controller.block_device_creation_timeout is defined %}
-block_device_creation_timeout = {{ controller.block_device_creation_timeout }}
+{%- if cfg.block_device_creation_timeout is defined %}
+block_device_creation_timeout = {{ cfg.block_device_creation_timeout }}
 {%- endif  %}
 
 #
@@ -10590,30 +10592,30 @@ block_device_creation_timeout = {{ controller.block_device_creation_timeout }}
 {#- include "oslo_templates/oslo/_matchmaker_redis.conf" #}
 
 [oslo_messaging_notifications]
-{%- set _data = controller.notification %}
+{%- set _data = cfg.notification %}
 {%- include "oslo_templates/files/queens/oslo/messaging/_notifications.conf" %}
 
-{%- if controller.message_queue is defined %}
-{%- set _data = controller.message_queue %}
+{%- if cfg.message_queue is defined %}
+{%- set _data = cfg.message_queue %}
 {%- if _data.engine == 'rabbitmq' %}
     {%- set messaging_engine = 'rabbit' %}
 {%- else %}
     {%- set messaging_engine = _data.engine %}
 {%- endif %}
 [oslo_messaging_{{ messaging_engine }}]
-{%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': controller.cacert_file}) %}{% endif %}
+{%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': cfg.cacert_file}) %}{% endif %}
 {%- include "oslo_templates/files/queens/oslo/messaging/_" + messaging_engine + ".conf" %}
 {%- endif %}
 
 [oslo_policy]
-{%- if controller.policy is defined %}
-{%- set _data = controller.policy %}
+{%- if cfg.policy is defined %}
+{%- set _data = cfg.policy %}
 {%- include "oslo_templates/files/queens/oslo/_policy.conf" %}
 {%- endif %}
 
 [database]
-{%- set _data = controller.database %}
-{%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': controller.cacert_file}) %}{% endif %}
+{%- set _data = cfg.database %}
+{%- if _data.ssl is defined and 'cacert_file' not in _data.get('ssl', {}).keys() %}{% do _data['ssl'].update({'cacert_file': cfg.cacert_file}) %}{% endif %}
 {%- include "oslo_templates/files/queens/oslo/_database.conf" %}
 
 [oslo_middleware]
@@ -10621,11 +10623,11 @@ block_device_creation_timeout = {{ controller.block_device_creation_timeout }}
 {%- include "oslo_templates/files/queens/oslo/_middleware.conf" %}
 
 [keystone_authtoken]
-{%- set _data = controller.identity %}
-{%- if 'cacert_file' not in _data.keys() %}{% do _data.update({'cacert_file': controller.cacert_file}) %}{% endif %}
+{%- set _data = cfg.identity %}
+{%- if 'cacert_file' not in _data.keys() %}{% do _data.update({'cacert_file': cfg.cacert_file}) %}{% endif %}
 {%- set auth_type = _data.get('auth_type', 'password') %}
-{%- if controller.get('cache',{}).members is defined and 'cache' not in _data.keys() %}
-{% do _data.update({'cache': controller.cache}) %}
+{%- if cfg.get('cache',{}).members is defined and 'cache' not in _data.keys() %}
+{% do _data.update({'cache': cfg.cache}) %}
 {%- endif %}
 {%- include "oslo_templates/files/queens/keystonemiddleware/_auth_token.conf" %}
 {%- include "oslo_templates/files/queens/keystoneauth/_type_" + auth_type + ".conf" %}
