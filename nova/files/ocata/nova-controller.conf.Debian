@@ -1,4 +1,4 @@
-{%- from "nova/map.jinja" import controller with context %}
+{%- from "nova/map.jinja" import cfg,api,controller,consoleauth with context %}
 [DEFAULT]
 
 #
@@ -181,8 +181,8 @@ allow_resize_to_same_host=true
 # * Any string representing an availability zone name
 # * Default value is None.
 #  (string value)
-{%- if controller.default_schedule_zone is defined %}
-default_schedule_zone = {{ controller.default_schedule_zone }}
+{%- if cfg.default_schedule_zone is defined %}
+default_schedule_zone = {{ cfg.default_schedule_zone }}
 {%- endif %}
 
 #
@@ -538,7 +538,7 @@ injected_network_template=$pybasedir/nova/virt/interfaces.template
 #  (floating point value)
 # Minimum value: 0
 #cpu_allocation_ratio=0.0
-cpu_allocation_ratio={{ controller.cpu_allocation_ratio }}
+cpu_allocation_ratio={{ cfg.cpu_allocation_ratio }}
 
 #
 # This option helps you specify virtual RAM to physical RAM
@@ -563,7 +563,7 @@ cpu_allocation_ratio={{ controller.cpu_allocation_ratio }}
 #  (floating point value)
 # Minimum value: 0
 #ram_allocation_ratio=0.0
-ram_allocation_ratio = {{ controller.ram_allocation_ratio }}
+ram_allocation_ratio = {{ cfg.ram_allocation_ratio }}
 
 #
 # This option helps you specify virtual disk to physical disk
@@ -592,7 +592,7 @@ ram_allocation_ratio = {{ controller.ram_allocation_ratio }}
 #  (floating point value)
 # Minimum value: 0
 #disk_allocation_ratio=0.0
-disk_allocation_ratio = {{ controller.disk_allocation_ratio }}
+disk_allocation_ratio = {{ cfg.disk_allocation_ratio }}
 
 #
 # Console proxy host to be used to connect to instances on this host. It is the
@@ -708,7 +708,7 @@ disk_allocation_ratio = {{ controller.disk_allocation_ratio }}
 # * For any value > 0, total attempts are (value + 1)
 #  (integer value)
 #block_device_allocate_retries=60
-block_device_allocate_retries={{ controller.get('block_device_allocate_retries', '600') }}
+block_device_allocate_retries={{ cfg.get('block_device_allocate_retries', '600') }}
 
 #
 # Number of greenthreads available for use to sync power states.
@@ -910,7 +910,7 @@ block_device_allocate_retries={{ controller.get('block_device_allocate_retries',
 #  (integer value)
 # Minimum value: 0
 #block_device_allocate_retries_interval=3
-block_device_allocate_retries_interval={{ controller.get('block_device_allocate_retries_interval', '10') }}
+block_device_allocate_retries_interval={{ cfg.get('block_device_allocate_retries_interval', '10') }}
 
 #
 # Interval between sending the scheduler a list of current instance UUIDs to
@@ -1488,7 +1488,7 @@ use_neutron = True
 # * vpn_ip
 #  (string value)
 #my_ip=10.89.104.70
-my_ip={{ controller.bind.private_address }}
+my_ip={{ cfg.bind.private_address }}
 
 #
 # The IP address which is used to connect to the block storage network.
@@ -1511,8 +1511,8 @@ my_ip={{ controller.bind.private_address }}
 # * String with hostname, FQDN or IP address. Default is hostname of this host.
 #  (string value)
 #host=lcy01-22
-{%- if controller.host is defined %}
-host={{ controller.host }}
+{%- if cfg.host is defined %}
+host={{ cfg.host }}
 {%- endif %}
 
 #
@@ -2272,8 +2272,8 @@ force_dhcp_release=true
 # Reason:
 # nova-network is deprecated, as are any related configuration options.
 #dhcp_domain=novalocal
-{%- if controller.dhcp_domain is defined %}
-dhcp_domain = {{ controller.dhcp_domain }}
+{%- if cfg.dhcp_domain is defined %}
+dhcp_domain = {{ cfg.dhcp_domain }}
 {%- endif %}
 
 # DEPRECATED:
@@ -2611,7 +2611,7 @@ report_interval=10
 #
 # * report_interval (service_down_time should not be less than report_interval)
 #  (integer value)
-service_down_time = {{ controller.service_down_time|default('180') }}
+service_down_time = {{ cfg.service_down_time|default('180') }}
 
 #
 # Enable periodic tasks.
@@ -2661,7 +2661,7 @@ enabled_apis=osapi_compute,metadata
 # requests.
 #  (string value)
 #osapi_compute_listen=0.0.0.0
-osapi_compute_listen={{ controller.bind.private_address }}
+osapi_compute_listen={{ cfg.bind.private_address }}
 
 #
 # Port on which the OpenStack API will listen.
@@ -2689,7 +2689,7 @@ osapi_compute_listen={{ controller.bind.private_address }}
 #  (integer value)
 # Minimum value: 1
 #osapi_compute_workers=<None>
-osapi_compute_workers = {{ controller.workers }}
+osapi_compute_workers = {{ cfg.workers }}
 
 #
 # IP address on which the metadata API will listen.
@@ -2698,8 +2698,8 @@ osapi_compute_workers = {{ controller.workers }}
 # requests.
 #  (string value)
 #metadata_listen=0.0.0.0
-metadata_listen={{ controller.get('metadata', {}).get('bind', {}).get('address', controller.bind.private_address) }}
-osapi_volume_listen={{ controller.bind.private_address }}
+metadata_listen={{ cfg.get('metadata', {}).get('bind', {}).get('address', cfg.bind.private_address) }}
+osapi_volume_listen={{ cfg.bind.private_address }}
 
 #
 # Port on which the metadata API will listen.
@@ -2709,8 +2709,8 @@ osapi_volume_listen={{ controller.bind.private_address }}
 #  (port value)
 # Minimum value: 0
 # Maximum value: 65535
-{%- if controller.get('metadata', {}).get('bind', {}).port is defined %}
-metadata_listen_port={{ controller.metadata.bind.port }}
+{%- if cfg.get('metadata', {}).get('bind', {}).port is defined %}
+metadata_listen_port={{ cfg.metadata.bind.port }}
 {%- else %}
 #metadata_listen_port=8775
 {%- endif %}
@@ -2731,7 +2731,7 @@ metadata_listen_port={{ controller.metadata.bind.port }}
 #  (integer value)
 # Minimum value: 1
 #metadata_workers=<None>
-metadata_workers = {{ controller.workers }}
+metadata_workers = {{ cfg.workers }}
 
 # Full class name for the Manager for network (string value)
 # Allowed values: nova.network.manager.FlatManager, nova.network.manager.FlatDHCPManager, nova.network.manager.VlanManager
@@ -2787,7 +2787,7 @@ verbose=true
 # Note: This option can be changed without restarting.
 # Deprecated group/name - [DEFAULT]/log_config
 #log_config_append=<None>
-{%- if controller.logging.log_appender %}
+{%- if cfg.logging.log_appender %}
 log_config_append=/etc/nova/logging.conf
 {%- endif %}
 
@@ -3048,20 +3048,20 @@ zmq_linger=30
 
 # Seconds to wait for a response from a call. (integer value)
 #rpc_response_timeout=60
-{%- if controller.message_queue.rpc_response_timeout is defined %}
-rpc_response_timeout = {{ controller.message_queue.rpc_response_timeout }}
+{%- if cfg.message_queue.rpc_response_timeout is defined %}
+rpc_response_timeout = {{ cfg.message_queue.rpc_response_timeout }}
 {%- endif %}
 
-{%- set rabbit_port = controller.message_queue.get('port', 5671 if controller.message_queue.get('ssl',{}).get('enabled', False) else 5672) %}
+{%- set rabbit_port = cfg.message_queue.get('port', 5671 if cfg.message_queue.get('ssl',{}).get('enabled', False) else 5672) %}
 
-{%- if controller.message_queue.members is defined %}
-transport_url = rabbit://{% for member in controller.message_queue.members -%}
-                             {{ controller.message_queue.user }}:{{ controller.message_queue.password }}@{{ member.host }}:{{ member.get('port', rabbit_port) }}
+{%- if cfg.message_queue.members is defined %}
+transport_url = rabbit://{% for member in cfg.message_queue.members -%}
+                             {{ cfg.message_queue.user }}:{{ cfg.message_queue.password }}@{{ member.host }}:{{ member.get('port', rabbit_port) }}
                              {%- if not loop.last -%},{%- endif -%}
                          {%- endfor -%}
-                             /{{ controller.message_queue.virtual_host }}
+                             /{{ cfg.message_queue.virtual_host }}
 {%- else %}
-transport_url = rabbit://{{ controller.message_queue.user }}:{{ controller.message_queue.password }}@{{ controller.message_queue.host }}:{{ rabbit_port}}/{{ controller.message_queue.virtual_host }}
+transport_url = rabbit://{{ cfg.message_queue.user }}:{{ cfg.message_queue.password }}@{{ cfg.message_queue.host }}:{{ rabbit_port}}/{{ cfg.message_queue.virtual_host }}
 {%- endif %}
 
 
@@ -3120,8 +3120,8 @@ rpc_backend=rabbit
 #* True: Average all the compute node's disk usage
 #* False: Sum all the compute node's disk usage
 # shared_storage =
-{%- if controller.shared_storage is defined %}
-shared_storage = {{ controller.shared_storage }}
+{%- if cfg.shared_storage is defined %}
+shared_storage = {{ cfg.shared_storage }}
 {%- endif %}
 
 
@@ -3331,7 +3331,7 @@ use_forwarded_for=false
 # Minimum value: 0
 # Deprecated group/name - [DEFAULT]/osapi_max_limit
 #max_limit=1000
-max_limit={{ controller.osapi_max_limit|default('1000') }}
+max_limit={{ cfg.osapi_max_limit|default('1000') }}
 
 #
 # This string is prepended to the normal URL that is returned in links to the
@@ -3427,6 +3427,7 @@ fping_path=/usr/sbin/fping
 #enable_instance_password=true
 
 
+{%- if controller.get('enabled') or api.get('enabled') %}
 [api_database]
 #
 # The *Nova API Database* is a separate database which is used for information
@@ -3436,17 +3437,17 @@ fping_path=/usr/sbin/fping
 #
 # From nova.conf
 #
-idle_timeout = {{ controller.database.get('idle_timeout', 180) }}
-min_pool_size = {{ controller.database.get('min_pool_size', 100) }}
-max_pool_size = {{ controller.database.get('max_pool_size', 700) }}
-max_overflow = {{ controller.database.get('max_overflow', 100) }}
-retry_interval = {{ controller.database.get('retry_interval', 5) }}
-max_retries = {{ controller.database.get('max_retries', '-1') }}
-db_max_retries = {{ controller.database.get('db_max_retries', 3) }}
-db_retry_interval = {{ controller.database.get('db_retry_interval', 1) }}
-connection_debug = {{ controller.database.get('connection_debug', 10) }}
-pool_timeout = {{ controller.database.get('pool_timeout', 120) }}
-connection = {{ controller.database.engine }}+pymysql://{{ controller.database.user }}:{{ controller.database.password }}@{{ controller.database.host }}/{{ controller.database.name }}_api?charset=utf8{%- if controller.database.get('ssl',{}).get('enabled',False) %}&ssl_ca={{ controller.database.ssl.get('cacert_file', controller.cacert_file) }}{% endif %}
+idle_timeout = {{ cfg.database.get('idle_timeout', 180) }}
+min_pool_size = {{ cfg.database.get('min_pool_size', 100) }}
+max_pool_size = {{ cfg.database.get('max_pool_size', 700) }}
+max_overflow = {{ cfg.database.get('max_overflow', 100) }}
+retry_interval = {{ cfg.database.get('retry_interval', 5) }}
+max_retries = {{ cfg.database.get('max_retries', '-1') }}
+db_max_retries = {{ cfg.database.get('db_max_retries', 3) }}
+db_retry_interval = {{ cfg.database.get('db_retry_interval', 1) }}
+connection_debug = {{ cfg.database.get('connection_debug', 10) }}
+pool_timeout = {{ cfg.database.get('pool_timeout', 120) }}
+connection = {{ cfg.database.engine }}+pymysql://{{ cfg.database.user }}:{{ cfg.database.password }}@{{ cfg.database.host }}/{{ cfg.database.name }}_api?charset=utf8{%- if cfg.database.get('ssl',{}).get('enabled',False) %}&ssl_ca={{ cfg.database.ssl.get('cacert_file', cfg.cacert_file) }}{% endif %}
 
 # The SQLAlchemy connection string to use to connect to the database. (string
 # value)
@@ -3491,7 +3492,7 @@ connection = {{ controller.database.engine }}+pymysql://{{ controller.database.u
 
 # If set, use this value for pool_timeout with SQLAlchemy. (integer value)
 #pool_timeout=<None>
-
+{%- endif %}
 
 [barbican]
 
@@ -3507,10 +3508,10 @@ connection = {{ controller.database.engine }}+pymysql://{{ controller.database.u
 #barbican_api_version=<None>
 
 # Use this endpoint to connect to Keystone (string value)
-{%- if controller.get('barbican', {}).get('enabled', False) %}
-auth_endpoint={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.get('host', 'localhost') }}:{{ controller.identity.get('port', '5000') }}/v3
-{%- if controller.identity.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+{%- if cfg.get('barbican', {}).get('enabled', False) %}
+auth_endpoint={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.get('host', 'localhost') }}:{{ cfg.identity.get('port', '5000') }}/v3
+{%- if cfg.identity.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 {%- endif %}
 
@@ -3527,10 +3528,10 @@ cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
 #
 # From nova.conf
 #
-{%- if controller.cache is defined %}
+{%- if cfg.cache is defined %}
 enabled = true
 backend = oslo_cache.memcache_pool
-memcache_servers={%- for member in controller.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
+memcache_servers={%- for member in cfg.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
 {%- endif %}
 # Prefix for building the configuration dictionary for the cache region. This
 # should not need to be changed unless there is another dogpile.cache region
@@ -4083,8 +4084,8 @@ enable=False
 #  (string value)
 #catalog_info=volumev2:cinderv2:publicURL
 catalog_info=volumev2:cinderv2:internalURL
-{%- if controller.glance.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+{%- if cfg.glance.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 #
 # If this option is set then it will override service catalog lookup with
@@ -4113,7 +4114,7 @@ cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
 # * Any string representing region name
 #  (string value)
 #os_region_name=<None>
-os_region_name = {{ controller.identity.region }}
+os_region_name = {{ cfg.identity.region }}
 
 #
 # Number of times cinderclient should retry on any failed http call.
@@ -4143,8 +4144,8 @@ os_region_name = {{ controller.identity.region }}
 # By default there is no availability zone restriction on volume attach.
 #  (boolean value)
 #cross_az_attach=true
-{%- if controller.cross_az_attach is defined %}
-cross_az_attach={{ controller.cross_az_attach }}
+{%- if cfg.cross_az_attach is defined %}
+cross_az_attach={{ cfg.cross_az_attach }}
 {%- endif %}
 
 [cloudpipe]
@@ -4268,7 +4269,7 @@ cross_az_attach={{ controller.cross_az_attach }}
 # number of CPUs available.
 #  (integer value)
 #workers=<None>
-workers = {{ controller.workers }}
+workers = {{ cfg.workers }}
 
 [console]
 #
@@ -4313,11 +4314,13 @@ workers = {{ controller.workers }}
 # Minimum value: 0
 # Deprecated group/name - [DEFAULT]/console_token_ttl
 #token_ttl=600
-{% if controller.consoleauth_token_ttl is defined %}
-{%- set token_ttl = controller.consoleauth_token_ttl %}
+{% if cfg.consoleauth_token_ttl is defined %}
+{%- set token_ttl = cfg.consoleauth_token_ttl %}
 token_ttl = {{ token_ttl }}
-{%- elif controller.get('consoleauth', {}).token_ttl is defined %}
-token_ttl = {{ controller.consoleauth.token_ttl }}
+{%- elif cfg.get('consoleauth', {}).token_ttl is defined %}
+token_ttl = {{ cfg.consoleauth.token_ttl }}
+{%- elif consoleauth.token_ttl is defined %}
+token_ttl = {{ consoleauth.token_ttl }}
 {% endif %}
 
 
@@ -4331,40 +4334,40 @@ token_ttl = {{ controller.consoleauth.token_ttl }}
 # requests "origin" header. Format: "<protocol>://<host>[:<port>]", no trailing
 # slash. Example: https://horizon.example.com (list value)
 #allowed_origin=<None>
-{% if controller.cors.allowed_origin is defined %}
-allowed_origin = {{ controller.cors.allowed_origin }}
+{% if cfg.cors.allowed_origin is defined %}
+allowed_origin = {{ cfg.cors.allowed_origin }}
 {% endif %}
 
 # Indicate that the actual request can include user credentials (boolean value)
 #allow_credentials=true
-{% if controller.cors.allow_credentials is defined %}
-allow_credentials = {{ controller.cors.allow_credentials }}
+{% if cfg.cors.allow_credentials is defined %}
+allow_credentials = {{ cfg.cors.allow_credentials }}
 {% endif %}
 
 # Indicate which headers are safe to expose to the API. Defaults to HTTP Simple
 # Headers. (list value)
 #expose_headers=X-Auth-Token,X-Openstack-Request-Id,X-Subject-Token,X-Service-Token
-{% if controller.cors.expose_headers is defined %}
-expose_headers = {{ controller.cors.expose_headers }}
+{% if cfg.cors.expose_headers is defined %}
+expose_headers = {{ cfg.cors.expose_headers }}
 {% endif %}
 
 # Maximum cache age of CORS preflight requests. (integer value)
 #max_age=3600
-{% if controller.cors.max_age is defined %}
-max_age = {{ controller.cors.max_age }}
+{% if cfg.cors.max_age is defined %}
+max_age = {{ cfg.cors.max_age }}
 {% endif %}
 
 # Indicate which methods can be used during the actual request. (list value)
 #allow_methods=GET,PUT,POST,DELETE,PATCH
-{% if controller.cors.allow_methods is defined %}
-allow_methods = {{ controller.cors.allow_methods }}
+{% if cfg.cors.allow_methods is defined %}
+allow_methods = {{ cfg.cors.allow_methods }}
 {% endif %}
 
 # Indicate which header field names may be used during the actual request. (list
 # value)
 #allow_headers=X-Auth-Token,X-Openstack-Request-Id,X-Identity-Status,X-Roles,X-Service-Catalog,X-User-Id,X-Tenant-Id
-{% if controller.cors.allow_headers is defined %}
-allow_headers = {{ controller.cors.allow_headers }}
+{% if cfg.cors.allow_headers is defined %}
+allow_headers = {{ cfg.cors.allow_headers }}
 {% endif %}
 
 [cors.subdomain]
@@ -4491,17 +4494,17 @@ allow_headers = {{ controller.cors.allow_headers }}
 # Reason: Should use config option connection or slave_connection to connect the
 # database.
 #sqlite_db=oslo.sqlite
-idle_timeout = {{ controller.database.get('idle_timeout', 180) }}
-min_pool_size = {{ controller.database.get('min_pool_size', 100) }}
-max_pool_size = {{ controller.database.get('max_pool_size', 700) }}
-max_overflow = {{ controller.database.get('max_overflow', 100) }}
-retry_interval = {{ controller.database.get('retry_interval', 5) }}
-max_retries = {{ controller.database.get('max_retries', '-1') }}
-db_max_retries = {{ controller.database.get('db_max_retries', 3) }}
-db_retry_interval = {{ controller.database.get('db_retry_interval', 1) }}
-connection_debug = {{ controller.database.get('connection_debug', 10) }}
-pool_timeout = {{ controller.database.get('pool_timeout', 120) }}
-connection = {{ controller.database.engine }}+pymysql://{{ controller.database.user }}:{{ controller.database.password }}@{{ controller.database.host }}/{{ controller.database.name }}?charset=utf8{%- if controller.database.get('ssl',{}).get('enabled',False) %}&ssl_ca={{ controller.database.ssl.get('cacert_file', controller.cacert_file) }}{% endif %}
+idle_timeout = {{ cfg.database.get('idle_timeout', 180) }}
+min_pool_size = {{ cfg.database.get('min_pool_size', 100) }}
+max_pool_size = {{ cfg.database.get('max_pool_size', 700) }}
+max_overflow = {{ cfg.database.get('max_overflow', 100) }}
+retry_interval = {{ cfg.database.get('retry_interval', 5) }}
+max_retries = {{ cfg.database.get('max_retries', '-1') }}
+db_max_retries = {{ cfg.database.get('db_max_retries', 3) }}
+db_retry_interval = {{ cfg.database.get('db_retry_interval', 1) }}
+connection_debug = {{ cfg.database.get('connection_debug', 10) }}
+pool_timeout = {{ cfg.database.get('pool_timeout', 120) }}
+connection = {{ cfg.database.engine }}+pymysql://{{ cfg.database.user }}:{{ cfg.database.password }}@{{ cfg.database.host }}/{{ cfg.database.name }}?charset=utf8{%- if cfg.database.get('ssl',{}).get('enabled',False) %}&ssl_ca={{ cfg.database.ssl.get('cacert_file', cfg.cacert_file) }}{% endif %}
 
 # If True, SQLite uses synchronous mode. (boolean value)
 # Deprecated group/name - [DEFAULT]/sqlite_synchronous
@@ -4758,7 +4761,7 @@ max_instances_per_host=50
 #available_filters=nova.scheduler.filters.all_filters
 available_filters=nova.scheduler.filters.all_filters
 available_filters=nova.scheduler.filters.pci_passthrough_filter.PciPassthroughFilter
-{% for filter in controller.get('scheduler_custom_filters', []) %}
+{% for filter in cfg.get('scheduler_custom_filters', []) %}
 available_filters = {{ filter }}
 {% endfor %}
 
@@ -4788,7 +4791,7 @@ available_filters = {{ filter }}
 #  (list value)
 # Deprecated group/name - [DEFAULT]/scheduler_default_filters
 #enabled_filters=RetryFilter,AvailabilityZoneFilter,RamFilter,DiskFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter
-enabled_filters={{ controller.scheduler_default_filters }}
+enabled_filters={{ cfg.scheduler_default_filters }}
 
 #
 # Filters used for filtering baremetal hosts.
@@ -5084,7 +5087,7 @@ use_baremetal_filters=false
 #   (i.e. "http://10.0.1.0:9292" or "https://my.glance.server/image").
 #  (list value)
 #api_servers=<None>
-api_servers = {{ controller.glance.get('protocol', 'http') }}://{{ controller.glance.host }}:{{ controller.glance.get('port', 9292) }}
+api_servers = {{ cfg.glance.get('protocol', 'http') }}://{{ cfg.glance.host }}:{{ cfg.glance.get('port', 9292) }}
 
 #
 # Enable insecure SSL (https) requests to glance.
@@ -5133,7 +5136,7 @@ api_servers = {{ controller.glance.get('protocol', 'http') }}://{{ controller.gl
 # * The options in the `key_manager` group, as the key_manager is used
 #   for the signature validation.
 #  (boolean value)
-{%- if controller.get('barbican', {}).get('enabled', False) %}
+{%- if cfg.get('barbican', {}).get('enabled', False) %}
 verify_glance_signatures=true
 {%- else %}
 #verify_glance_signatures=false
@@ -5665,7 +5668,7 @@ verify_glance_signatures=true
 #fixed_key=<None>
 
 # The full class name of the key manager API class (string value)
-{%- if controller.get('barbican', {}).get('enabled', False) %}
+{%- if cfg.get('barbican', {}).get('enabled', False) %}
 api_class=castellan.key_manager.barbican_key_manager.BarbicanKeyManager
 {%- endif %}
 
@@ -5739,18 +5742,18 @@ api_class=castellan.key_manager.barbican_key_manager.BarbicanKeyManager
 revocation_cache_time = 10
 signing_dir=/tmp/keystone-signing-nova
 auth_type = password
-user_domain_id = {{ controller.identity.get('domain', 'default') }}
-project_domain_id = {{ controller.identity.get('domain', 'default') }}
-project_name = {{ controller.identity.tenant }}
-username = {{ controller.identity.user }}
-password = {{ controller.identity.password }}
-auth_uri={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:5000
-auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:35357
-{%- if controller.identity.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+user_domain_id = {{ cfg.identity.get('domain', 'default') }}
+project_domain_id = {{ cfg.identity.get('domain', 'default') }}
+project_name = {{ cfg.identity.tenant }}
+username = {{ cfg.identity.user }}
+password = {{ cfg.identity.password }}
+auth_uri={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:5000
+auth_url={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:35357
+{%- if cfg.identity.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
-{%- if controller.cache is defined %}
-memcached_servers={%- for member in controller.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
+{%- if cfg.cache is defined %}
+memcached_servers={%- for member in cfg.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
 {%- endif %}
 # Complete "public" Identity API endpoint. This endpoint should not be an
 # "admin" endpoint, as it should be accessible by all end users. Unauthenticated
@@ -6369,8 +6372,8 @@ use_usb_tablet=true
 #     * live_migration_permit_post_copy
 #  (boolean value)
 #live_migration_permit_auto_converge=false
-{%- if controller.get('libvirt', {}).live_migration_permit_auto_converge is defined %}
-live_migration_permit_auto_converge={{ controller.libvirt.live_migration_permit_auto_converge|lower }}
+{%- if cfg.get('libvirt', {}).live_migration_permit_auto_converge is defined %}
+live_migration_permit_auto_converge={{ cfg.libvirt.live_migration_permit_auto_converge|lower }}
 {%- endif %}
 
 #
@@ -6747,8 +6750,8 @@ use_virtio_for_bridges=true
 # * Any string representing mount options separated by commas.
 # * Example string: vers=3,lookupcache=pos
 #  (string value)
-{%- if controller.nfs_mount_options is defined %}
-nfs_mount_options="{{ controller.nfs_mount_options }}"
+{%- if cfg.nfs_mount_options is defined %}
+nfs_mount_options="{{ cfg.nfs_mount_options }}"
 {%- endif %}
 
 #
@@ -7131,23 +7134,23 @@ nfs_mount_options="{{ controller.nfs_mount_options }}"
 auth_type=v3password
 project_domain_name = Default
 user_domain_name = Default
-auth_url = {{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:35357/v3
+auth_url = {{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:35357/v3
 {% if pillar.neutron is defined and pillar.neutron.server is defined %}
 password={{ pillar.neutron.server.identity.password }}
 project_name={{ pillar.neutron.server.identity.tenant }}
 username={{ pillar.neutron.server.identity.user }}
 region_name= {{ pillar.neutron.server.identity.region }}
 {%- else %}
-password={{ controller.network.password }}
-project_name={{ controller.network.tenant }}
-username={{ controller.network.user }}
-region_name= {{ controller.network.region }}
+password={{ cfg.network.password }}
+project_name={{ cfg.network.tenant }}
+username={{ cfg.network.user }}
+region_name= {{ cfg.network.region }}
 {%- endif %}
-url={{ controller.network.get('protocol', 'http') }}://{{ controller.network.host }}:{{ controller.network.port }}
-{%- if controller.network.get('protocol', 'http') == 'https' %}
-cafile={{ controller.network.get('cacert_file', controller.cacert_file) }}
+url={{ cfg.network.get('protocol', 'http') }}://{{ cfg.network.host }}:{{ cfg.network.port }}
+{%- if cfg.network.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.network.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
-metadata_proxy_shared_secret={{ controller.metadata.password }}
+metadata_proxy_shared_secret={{ cfg.metadata.password }}
 service_metadata_proxy=True
 #
 # This option specifies the URL for connecting to Neutron.
@@ -7706,12 +7709,12 @@ lock_path=/var/lib/nova/tmp
 # messagingv2, routing, log, test, noop (multi valued)
 # Deprecated group/name - [DEFAULT]/notification_driver
 #driver =
-{%- if controller.notification is mapping %}
-driver = {{ controller.notification.get('driver', 'messagingv2') }}
-{%- if controller.notification.topics is defined %}
-topics = {{ controller.notification.topics }}
+{%- if cfg.notification is mapping %}
+driver = {{ cfg.notification.get('driver', 'messagingv2') }}
+{%- if cfg.notification.topics is defined %}
+topics = {{ cfg.notification.topics }}
 {%- endif %}
-{%- elif controller.notification %}
+{%- elif cfg.notification %}
 driver=messagingv2
 {%- endif %}
 
@@ -7992,16 +7995,16 @@ rpc_conn_pool_size = 300
 #rpc_retry_delay=0.25
 
 {# rabbitmq ssl configuration #}
-{%- if controller.message_queue.get('ssl',{}).get('enabled', False) %}
+{%- if cfg.message_queue.get('ssl',{}).get('enabled', False) %}
 rabbit_use_ssl=true
 
-{%- if controller.message_queue.ssl.version is defined %}
-kombu_ssl_version = {{ controller.message_queue.ssl.version }}
+{%- if cfg.message_queue.ssl.version is defined %}
+kombu_ssl_version = {{ cfg.message_queue.ssl.version }}
 {%- elif salt['grains.get']('pythonversion') > [2,7,8] %}
 kombu_ssl_version = TLSv1_2
 {%- endif %}
 
-kombu_ssl_ca_certs = {{ controller.message_queue.ssl.get('cacert_file', controller.cacert_file) }}
+kombu_ssl_ca_certs = {{ cfg.message_queue.ssl.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 
 [oslo_messaging_zmq]
@@ -8245,8 +8248,8 @@ enable_proxy_headers_parsing=True
 #  (multi valued)
 # Deprecated group/name - [DEFAULT]/pci_alias
 #alias =
-{%- if controller.get('pci', {}).get('alias', false) %}
-  {%- for alias_name, alias in controller.pci.alias.iteritems() %}
+{%- if cfg.get('pci', {}).get('alias', false) %}
+  {%- for alias_name, alias in cfg.pci.alias.iteritems() %}
 alias = {{ alias | json }}
   {%- endfor %}
 {%- endif %}
@@ -8315,8 +8318,8 @@ alias = {{ alias | json }}
 #  (multi valued)
 # Deprecated group/name - [DEFAULT]/pci_passthrough_whitelist
 #passthrough_whitelist =
-{%- if controller.get('pci', {}).get('passthrough_whitelist', false) %}
-  {%- for item in controller.pci.passthrough_whitelist %}
+{%- if cfg.get('pci', {}).get('passthrough_whitelist', false) %}
+  {%- for item in cfg.pci.passthrough_whitelist %}
 passthrough_whitelist = {{ item | json }}
   {%- endfor %}
 {%- endif %}
@@ -8336,16 +8339,16 @@ passthrough_whitelist = {{ item | json }}
 #
 # * Any string representing region name
 #  (string value)
-os_region_name = {{ controller.identity.region }}
+os_region_name = {{ cfg.identity.region }}
 auth_type = password
-user_domain_id = {{ controller.identity.get('domain', 'default') }}
-project_domain_id = {{ controller.identity.get('domain', 'default') }}
-project_name = {{ controller.identity.tenant }}
-username = {{ controller.identity.user }}
-password = {{ controller.identity.password }}
-auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:35357/v3
-{%- if controller.identity.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+user_domain_id = {{ cfg.identity.get('domain', 'default') }}
+project_domain_id = {{ cfg.identity.get('domain', 'default') }}
+project_name = {{ cfg.identity.tenant }}
+username = {{ cfg.identity.user }}
+password = {{ cfg.identity.password }}
+auth_url={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:35357/v3
+{%- if cfg.identity.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 os_interface = internal
 
@@ -9030,22 +9033,22 @@ discover_hosts_in_cells_interval=300
 #
 # From nova.conf
 #
-{%- if controller.get('service_user', {}).get('enabled', True) %}
+{%- if cfg.get('service_user', {}).get('enabled', True) %}
 send_service_user_token = True
 auth_type = password
-  {%- if controller.service_user is defined %}
-  {%- set _data=controller.service_user %}
+  {%- if cfg.service_user is defined %}
+  {%- set _data=cfg.service_user %}
   {%- else %}
-  {%- set _data=controller.identity %}
+  {%- set _data=cfg.identity %}
   {%- endif %}
 user_domain_id = {{ _data.get('domain', 'default') }}
 project_domain_id = {{ _data.get('domain', 'default') }}
 project_name = {{ _data.get('tenant', 'service') }}
 username = {{ _data.get('user', 'nova') }}
 password = {{ _data.password }}
-auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:5000
-  {%- if controller.identity.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+auth_url={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:5000
+  {%- if cfg.identity.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
   {%- endif %}
 {%- endif %}
 
@@ -9159,7 +9162,7 @@ cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
 # * update html5proxy_base_url
 # * update server_proxyclient_address
 enabled = false
-html5proxy_base_url = {{ controller.vncproxy_url }}/spice_auto.html
+html5proxy_base_url = {{ cfg.vncproxy_url }}/spice_auto.html
 #
 # From nova.conf
 #
@@ -9295,8 +9298,8 @@ html5proxy_base_url = {{ controller.vncproxy_url }}/spice_auto.html
 
 # CA certificate file to use to verify connecting clients. (string value)
 # Deprecated group/name - [DEFAULT]/ssl_ca_file
-{%- if controller.identity.get('protocol', 'http') == 'https' %}
-ca_file={{ controller.glance.get('cacert_file', controller.cacert_file) }}
+{%- if cfg.identity.get('protocol', 'http') == 'https' %}
+ca_file={{ cfg.glance.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 
 # Certificate file to use when starting the server securely. (string value)
@@ -9502,8 +9505,8 @@ ca_file={{ controller.glance.get('cacert_file', controller.cacert_file) }}
 
 
 [upgrade_levels]
-{%- if controller.upgrade_levels is defined %}
-{%- for key, value in controller.upgrade_levels.iteritems() %}
+{%- if cfg.upgrade_levels is defined %}
+{%- for key, value in cfg.upgrade_levels.iteritems() %}
 {{ key }}={{ value }}
 {%- endfor %}
 {%- endif %}
@@ -10011,16 +10014,16 @@ enabled=true
 # Deprecated group/name - [DEFAULT]/novncproxy_base_url
 #novncproxy_base_url=http://127.0.0.1:6080/vnc_auto.html
 enabled = true
-novncproxy_host = {{ controller.bind.get('novncproxy_address', '0.0.0.0') }}
-novncproxy_base_url = {{ controller.vncproxy_url }}/vnc_auto.html
-novncproxy_port={{ controller.bind.get('vncproxy_port', '6080') }}
+novncproxy_host = {{ cfg.bind.get('novncproxy_address', '0.0.0.0') }}
+novncproxy_base_url = {{ cfg.vncproxy_url }}/vnc_auto.html
+novncproxy_port={{ cfg.bind.get('vncproxy_port', '6080') }}
 {%- if pillar.nova.compute is defined %}
-vncserver_listen={{ controller.bind.private_address }}
-vncserver_proxyclient_address={{ controller.bind.private_address }}
+vncserver_listen={{ cfg.bind.private_address }}
+vncserver_proxyclient_address={{ cfg.bind.private_address }}
 {%- else %}
-vncserver_listen={{ controller.bind.get('novncproxy_address', '0.0.0.0') }}
+vncserver_listen={{ cfg.bind.get('novncproxy_address', '0.0.0.0') }}
 {%- endif %}
-keymap = {{ controller.get('vnc_keymap', 'en-us') }}
+keymap = {{ cfg.get('vnc_keymap', 'en-us') }}
 
 #
 # IP address or hostname that the XVP VNC console proxy should bind to.
@@ -10639,8 +10642,8 @@ api_paste_config=/etc/nova/api-paste.ini
 # Time in secs to wait for a block device to be created (integer value)
 # Minimum value: 1
 #block_device_creation_timeout=10
-{%- if controller.block_device_creation_timeout is defined %}
-block_device_creation_timeout = {{ controller.block_device_creation_timeout }}
+{%- if cfg.block_device_creation_timeout is defined %}
+block_device_creation_timeout = {{ cfg.block_device_creation_timeout }}
 {%- endif  %}
 
 #

@@ -1,9 +1,12 @@
-{%- from "nova/map.jinja" import controller,compute,monitoring with context %}
+{%- from "nova/map.jinja" import cfg,controller,compute,monitoring with context %}
 {%- if pillar.nova.controller is defined %}
 {%- set region = controller.identity.region %}
-{%- endif %}
+{%- else %}
 {%- if pillar.nova.compute is defined %}
 {%- set region = compute.identity.region %}
+{%- else %}
+{%- set region = cfg.identity.region %}
+{%- endif %}
 {%- endif %}
 
 check:

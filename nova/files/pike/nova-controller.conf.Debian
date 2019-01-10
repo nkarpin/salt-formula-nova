@@ -1,10 +1,10 @@
-{%- from "nova/map.jinja" import controller,compute_driver_mapping with context %}
+{%- from "nova/map.jinja" import cfg,api,controller,consoleauth,compute_driver_mapping with context %}
 
 {%- set connection_x509_ssl_option = '' %}
-{%- if controller.database.get('x509',{}).get('enabled',False) %}
-  {%- set connection_x509_ssl_option = '&ssl_ca=' ~ controller.database.x509.ca_file ~ '&ssl_cert=' ~ controller.database.x509.cert_file ~ '&ssl_key=' ~ controller.database.x509.key_file %}
-{%- elif controller.database.get('ssl',{}).get('enabled',False) %}
-  {%- set connection_x509_ssl_option = '&ssl_ca=' ~ controller.database.ssl.get('cacert_file', controller.cacert_file) %}
+{%- if cfg.database.get('x509',{}).get('enabled',False) %}
+  {%- set connection_x509_ssl_option = '&ssl_ca=' ~ cfg.database.x509.ca_file ~ '&ssl_cert=' ~ cfg.database.x509.cert_file ~ '&ssl_key=' ~ cfg.database.x509.key_file %}
+{%- elif cfg.database.get('ssl',{}).get('enabled',False) %}
+  {%- set connection_x509_ssl_option = '&ssl_ca=' ~ cfg.database.ssl.get('cacert_file', cfg.cacert_file) %}
 {%- endif %}
 
 [DEFAULT]
@@ -101,8 +101,8 @@ image_service=nova.image.glance.GlanceImageService
 #    starting on 15th day of month.
 #  (string value)
 #instance_usage_audit_period=month
-{% if controller.instance_usage_audit_period is defined %}
-instance_usage_audit_period = {{ controller.instance_usage_audit_period }}
+{% if cfg.instance_usage_audit_period is defined %}
+instance_usage_audit_period = {{ cfg.instance_usage_audit_period }}
 {%- endif %}
 
 #
@@ -168,7 +168,7 @@ rootwrap_config=/etc/nova/rootwrap.conf
 # * ``hyperv.HyperVDriver``
 #  (string value)
 #compute_driver=<None>
-compute_driver = {{ controller.get('compute_driver', 'libvirt.LibvirtDriver') }}
+compute_driver = {{ cfg.get('compute_driver', 'libvirt.LibvirtDriver') }}
 
 #
 # Allow destination machine to match source for resize. Useful when
@@ -191,8 +191,8 @@ allow_resize_to_same_host=true
 # * Any string representing an availability zone name
 # * Default value is None.
 #  (string value)
-{%- if controller.default_schedule_zone is defined %}
-default_schedule_zone = {{ controller.default_schedule_zone }}
+{%- if cfg.default_schedule_zone is defined %}
+default_schedule_zone = {{ cfg.default_schedule_zone }}
 {%- endif %}
 
 #
@@ -316,7 +316,7 @@ default_schedule_zone = {{ controller.default_schedule_zone }}
 # * False: Instances should continue booting after VIF plugging timeout
 #  (boolean value)
 #vif_plugging_is_fatal=true
-vif_plugging_is_fatal = {{ controller.get('vif_plugging_is_fatal', 'false') }}
+vif_plugging_is_fatal = {{ cfg.get('vif_plugging_is_fatal', 'false') }}
 
 #
 # Timeout for Neutron VIF plugging event message arrival.
@@ -332,7 +332,7 @@ vif_plugging_is_fatal = {{ controller.get('vif_plugging_is_fatal', 'false') }}
 #  (integer value)
 # Minimum value: 0
 #vif_plugging_timeout=300
-vif_plugging_timeout = {{ controller.get('vif_plugging_timeout', '300') }}
+vif_plugging_timeout = {{ cfg.get('vif_plugging_timeout', '300') }}
 
 # Path to '/etc/network/interfaces' template.
 #
@@ -423,8 +423,8 @@ injected_network_template=$pybasedir/nova/virt/interfaces.template
 # Amount of time, in seconds, to wait for NBD device start up. (integer value)
 # Minimum value: 0
 #timeout_nbd=10
-{%- if controller.timeout_nbd is defined %}
-timeout_nbd = {{ controller.timeout_nbd }}
+{%- if cfg.timeout_nbd is defined %}
+timeout_nbd = {{ cfg.timeout_nbd }}
 {%- endif %}
 
 #
@@ -551,7 +551,7 @@ timeout_nbd = {{ controller.timeout_nbd }}
 #  (floating point value)
 # Minimum value: 0
 #cpu_allocation_ratio=0.0
-cpu_allocation_ratio={{ controller.cpu_allocation_ratio }}
+cpu_allocation_ratio={{ cfg.cpu_allocation_ratio }}
 
 #
 # This option helps you specify virtual RAM to physical RAM
@@ -576,7 +576,7 @@ cpu_allocation_ratio={{ controller.cpu_allocation_ratio }}
 #  (floating point value)
 # Minimum value: 0
 #ram_allocation_ratio=0.0
-ram_allocation_ratio = {{ controller.ram_allocation_ratio }}
+ram_allocation_ratio = {{ cfg.ram_allocation_ratio }}
 
 #
 # This option helps you specify virtual disk to physical disk
@@ -605,7 +605,7 @@ ram_allocation_ratio = {{ controller.ram_allocation_ratio }}
 #  (floating point value)
 # Minimum value: 0
 #disk_allocation_ratio=0.0
-disk_allocation_ratio = {{ controller.disk_allocation_ratio }}
+disk_allocation_ratio = {{ cfg.disk_allocation_ratio }}
 
 #
 # Console proxy host to be used to connect to instances on this host. It is the
@@ -652,8 +652,8 @@ disk_allocation_ratio = {{ controller.disk_allocation_ratio }}
 # notifications are consumed by OpenStack Telemetry service.
 #  (boolean value)
 #instance_usage_audit=false
-{% if controller.instance_usage_audit is defined %}
-instance_usage_audit = {{ controller.instance_usage_audit }}
+{% if cfg.instance_usage_audit is defined %}
+instance_usage_audit = {{ cfg.instance_usage_audit }}
 {%- endif %}
 
 #
@@ -724,7 +724,7 @@ instance_usage_audit = {{ controller.instance_usage_audit }}
 # * For any value > 0, total attempts are (value + 1)
 #  (integer value)
 #block_device_allocate_retries=60
-block_device_allocate_retries={{ controller.get('block_device_allocate_retries', '600') }}
+block_device_allocate_retries={{ cfg.get('block_device_allocate_retries', '600') }}
 
 #
 # Number of greenthreads available for use to sync power states.
@@ -806,8 +806,8 @@ block_device_allocate_retries={{ controller.get('block_device_allocate_retries',
 # * Any value <=0 will disable the sync. This is not recommended.
 #  (integer value)
 #heal_instance_info_cache_interval=60
-{%- if controller.heal_instance_info_cache_interval is defined %}
-heal_instance_info_cache_interval = {{ controller.heal_instance_info_cache_interval }}
+{%- if cfg.heal_instance_info_cache_interval is defined %}
+heal_instance_info_cache_interval = {{ cfg.heal_instance_info_cache_interval }}
 {%- endif %}
 
 
@@ -836,8 +836,8 @@ heal_instance_info_cache_interval = {{ controller.heal_instance_info_cache_inter
 # * Any value <=0 will disable the option.
 #  (integer value)
 #reclaim_instance_interval=0
-{%- if controller.reclaim_instance_interval is defined %}
-reclaim_instance_interval = {{ controller.reclaim_instance_interval }}
+{%- if cfg.reclaim_instance_interval is defined %}
+reclaim_instance_interval = {{ cfg.reclaim_instance_interval }}
 {%- endif %}
 
 #
@@ -933,7 +933,7 @@ reclaim_instance_interval = {{ controller.reclaim_instance_interval }}
 #  (integer value)
 # Minimum value: 0
 #block_device_allocate_retries_interval=3
-block_device_allocate_retries_interval={{ controller.get('block_device_allocate_retries_interval', '10') }}
+block_device_allocate_retries_interval={{ cfg.get('block_device_allocate_retries_interval', '10') }}
 
 #
 # Interval between sending the scheduler a list of current instance UUIDs to
@@ -1008,8 +1008,8 @@ block_device_allocate_retries_interval={{ controller.get('block_device_allocate_
 # * Any positive integer in seconds: Enables the option.
 #  (integer value)
 # Minimum value: 0
-{%- if controller.instance_build_timeout is defined %}
-instance_build_timeout = {{ controller.instance_build_timeout }}
+{%- if cfg.instance_build_timeout is defined %}
+instance_build_timeout = {{ cfg.instance_build_timeout }}
 {%- else %}
 #instance_build_timeout = 0
 {%- endif %}
@@ -1515,7 +1515,7 @@ use_neutron = True
 # * vpn_ip
 #  (string value)
 #my_ip=10.89.104.70
-my_ip={{ controller.bind.private_address }}
+my_ip={{ cfg.bind.private_address }}
 
 #
 # The IP address which is used to connect to the block storage network.
@@ -1538,8 +1538,8 @@ my_ip={{ controller.bind.private_address }}
 # * String with hostname, FQDN or IP address. Default is hostname of this host.
 #  (string value)
 #host=lcy01-22
-{%- if controller.host is defined %}
-host={{ controller.host }}
+{%- if cfg.host is defined %}
+host={{ cfg.host }}
 {%- endif %}
 
 #
@@ -2546,10 +2546,10 @@ firewall_driver=nova.virt.firewall.NoopFirewallDriver
 
 # Disallow non-encrypted connections. (boolean value)
 #ssl_only=false
-{%- if controller.novncproxy.tls.get('enabled', False) %}
+{%- if cfg.novncproxy.tls.get('enabled', False) %}
 ssl_only=True
-cert={{controller.novncproxy.tls.server.cert_file|yaml_squote}}
-key={{controller.novncproxy.tls.server.key_file|yaml_squote}}
+cert={{cfg.novncproxy.tls.server.cert_file|yaml_squote}}
+key={{cfg.novncproxy.tls.server.key_file|yaml_squote}}
 {%- endif %}
 
 # Set to True if source host is addressed with IPv6. (boolean value)
@@ -2640,7 +2640,7 @@ report_interval=10
 #
 # * report_interval (service_down_time should not be less than report_interval)
 #  (integer value)
-service_down_time = {{ controller.service_down_time|default('180') }}
+service_down_time = {{ cfg.service_down_time|default('180') }}
 
 #
 # Enable periodic tasks.
@@ -2690,7 +2690,7 @@ enabled_apis=osapi_compute,metadata
 # requests.
 #  (string value)
 #osapi_compute_listen=0.0.0.0
-osapi_compute_listen={{ controller.bind.private_address }}
+osapi_compute_listen={{ cfg.bind.private_address }}
 
 #
 # Port on which the OpenStack API will listen.
@@ -2718,7 +2718,7 @@ osapi_compute_listen={{ controller.bind.private_address }}
 #  (integer value)
 # Minimum value: 1
 #osapi_compute_workers=<None>
-osapi_compute_workers = {{ controller.workers }}
+osapi_compute_workers = {{ cfg.workers }}
 
 #
 # IP address on which the metadata API will listen.
@@ -2727,8 +2727,8 @@ osapi_compute_workers = {{ controller.workers }}
 # requests.
 #  (string value)
 #metadata_listen=0.0.0.0
-metadata_listen={{ controller.get('metadata', {}).get('bind', {}).get('address', controller.bind.private_address) }}
-osapi_volume_listen={{ controller.bind.private_address }}
+metadata_listen={{ cfg.get('metadata', {}).get('bind', {}).get('address', cfg.bind.private_address) }}
+osapi_volume_listen={{ cfg.bind.private_address }}
 
 #
 # Port on which the metadata API will listen.
@@ -2738,8 +2738,8 @@ osapi_volume_listen={{ controller.bind.private_address }}
 #  (port value)
 # Minimum value: 0
 # Maximum value: 65535
-{%- if controller.get('metadata', {}).get('bind', {}).port is defined %}
-metadata_listen_port={{ controller.metadata.bind.port }}
+{%- if cfg.get('metadata', {}).get('bind', {}).port is defined %}
+metadata_listen_port={{ cfg.metadata.bind.port }}
 {%- else %}
 #metadata_listen_port=8775
 {%- endif %}
@@ -2760,7 +2760,7 @@ metadata_listen_port={{ controller.metadata.bind.port }}
 #  (integer value)
 # Minimum value: 1
 #metadata_workers=<None>
-metadata_workers = {{ controller.workers }}
+metadata_workers = {{ cfg.workers }}
 
 # Full class name for the Manager for network (string value)
 # Allowed values: nova.network.manager.FlatManager, nova.network.manager.FlatDHCPManager, nova.network.manager.VlanManager
@@ -2815,7 +2815,7 @@ verbose=true
 # example, logging_context_format_string). (string value)
 # Note: This option can be changed without restarting.
 # Deprecated group/name - [DEFAULT]/log_config
-{%- if controller.logging.log_appender %}
+{%- if cfg.logging.log_appender %}
 log_config_append=/etc/nova/logging.conf
 {%- endif %}
 
@@ -2909,20 +2909,20 @@ log_dir=/var/log/nova
 # Size of RPC connection pool. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_conn_pool_size
 #rpc_conn_pool_size=30
-{%- if controller.message_queue.rpc_conn_pool_size is defined %}
-rpc_conn_pool_size = {{ controller.message_queue.rpc_conn_pool_size }}
+{%- if cfg.message_queue.rpc_conn_pool_size is defined %}
+rpc_conn_pool_size = {{ cfg.message_queue.rpc_conn_pool_size }}
 {%- endif %}
 
 # The pool size limit for connections expiration policy (integer value)
 #conn_pool_min_size=2
-{%- if controller.message_queue.conn_pool_min_size is defined %}
-conn_pool_min_size = {{ controller.message_queue.conn_pool_min_size }}
+{%- if cfg.message_queue.conn_pool_min_size is defined %}
+conn_pool_min_size = {{ cfg.message_queue.conn_pool_min_size }}
 {%- endif %}
 
 # The time-to-live in sec of idle connections in the pool (integer value)
 #conn_pool_ttl=1200
-{%- if controller.message_queue.conn_pool_ttl is defined %}
-conn_pool_ttl = {{ controller.message_queue.conn_pool_ttl }}
+{%- if cfg.message_queue.conn_pool_ttl is defined %}
+conn_pool_ttl = {{ cfg.message_queue.conn_pool_ttl }}
 {%- endif %}
 
 # ZeroMQ bind address. Should be a wildcard (*), an ethernet interface, or IP.
@@ -2966,8 +2966,8 @@ zmq_linger=30
 # exception when timeout expired. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_poll_timeout
 #rpc_poll_timeout=1
-{%- if controller.message_queue.rpc_poll_timeout is defined %}
-rpc_poll_timeout = {{ controller.message_queue.rpc_poll_timeout }}
+{%- if cfg.message_queue.rpc_poll_timeout is defined %}
+rpc_poll_timeout = {{ cfg.message_queue.rpc_poll_timeout }}
 {%- endif %}
 
 
@@ -3054,22 +3054,22 @@ rpc_poll_timeout = {{ controller.message_queue.rpc_poll_timeout }}
 
 # Maximum number of (green) threads to work concurrently. (integer value)
 #rpc_thread_pool_size=100
-{%- if controller.message_queue.rpc_thread_pool_size is defined %}
-rpc_thread_pool_size = {{ controller.message_queue.rpc_thread_pool_size }}
+{%- if cfg.message_queue.rpc_thread_pool_size is defined %}
+rpc_thread_pool_size = {{ cfg.message_queue.rpc_thread_pool_size }}
 {%- endif %}
 
 # Expiration timeout in seconds of a sent/received message after which it is not
 # tracked anymore by a client/server. (integer value)
 #rpc_message_ttl=300
-{%- if controller.message_queue.rpc_message_ttl is defined %}
-rpc_message_ttl = {{ controller.message_queue.rpc_message_ttl }}
+{%- if cfg.message_queue.rpc_message_ttl is defined %}
+rpc_message_ttl = {{ cfg.message_queue.rpc_message_ttl }}
 {%- endif %}
 
 # Wait for message acknowledgements from receivers. This mechanism works only
 # via proxy without PUB/SUB. (boolean value)
 #rpc_use_acks=false
-{%- if controller.message_queue.rpc_use_acks is defined %}
-rpc_use_acks = {{ controller.message_queue.rpc_use_acks }}
+{%- if cfg.message_queue.rpc_use_acks is defined %}
+rpc_use_acks = {{ cfg.message_queue.rpc_use_acks }}
 {%- endif %}
 
 
@@ -3077,16 +3077,16 @@ rpc_use_acks = {{ controller.message_queue.rpc_use_acks }}
 # attempt this timeout is multiplied by some specified multiplier. (integer
 # value)
 #rpc_ack_timeout_base=15
-{%- if controller.message_queue.rpc_ack_timeout_base is defined %}
-rpc_ack_timeout_base = {{ controller.message_queue.rpc_ack_timeout_base }}
+{%- if cfg.message_queue.rpc_ack_timeout_base is defined %}
+rpc_ack_timeout_base = {{ cfg.message_queue.rpc_ack_timeout_base }}
 {%- endif %}
 
 
 # Number to multiply base ack timeout by after each retry attempt. (integer
 # value)
 #rpc_ack_timeout_multiplier=2
-{%- if controller.message_queue.rpc_ack_timeout_multiplier is defined %}
-rpc_ack_timeout_multiplier = {{ controller.message_queue.rpc_ack_timeout_multiplier }}
+{%- if cfg.message_queue.rpc_ack_timeout_multiplier is defined %}
+rpc_ack_timeout_multiplier = {{ cfg.message_queue.rpc_ack_timeout_multiplier }}
 {%- endif %}
 
 
@@ -3095,8 +3095,8 @@ rpc_ack_timeout_multiplier = {{ controller.message_queue.rpc_ack_timeout_multipl
 # any other negative values) mean to retry forever. This option is used only if
 # acknowledgments are enabled. (integer value)
 #rpc_retry_attempts=3
-{%- if controller.message_queue.rpc_retry_attempts is defined %}
-rpc_retry_attempts = {{ controller.message_queue.rpc_retry_attempts }}
+{%- if cfg.message_queue.rpc_retry_attempts is defined %}
+rpc_retry_attempts = {{ cfg.message_queue.rpc_retry_attempts }}
 {%- endif %}
 
 
@@ -3108,27 +3108,27 @@ rpc_retry_attempts = {{ controller.message_queue.rpc_retry_attempts }}
 # Size of executor thread pool. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_thread_pool_size
 #executor_thread_pool_size=64
-{%- if controller.message_queue.executor_thread_pool_size is defined %}
-executor_thread_pool_size = {{ controller.message_queue.executor_thread_pool_size }}
+{%- if cfg.message_queue.executor_thread_pool_size is defined %}
+executor_thread_pool_size = {{ cfg.message_queue.executor_thread_pool_size }}
 {%- endif %}
 
 
 # Seconds to wait for a response from a call. (integer value)
 #rpc_response_timeout=60
-{%- if controller.message_queue.rpc_response_timeout is defined %}
-rpc_response_timeout = {{ controller.message_queue.rpc_response_timeout }}
+{%- if cfg.message_queue.rpc_response_timeout is defined %}
+rpc_response_timeout = {{ cfg.message_queue.rpc_response_timeout }}
 {%- endif %}
 
-{%- set rabbit_port = controller.message_queue.get('port', 5671 if controller.message_queue.get('ssl',{}).get('enabled', False) else 5672) %}
+{%- set rabbit_port = cfg.message_queue.get('port', 5671 if cfg.message_queue.get('ssl',{}).get('enabled', False) else 5672) %}
 
-{%- if controller.message_queue.members is defined %}
-transport_url = rabbit://{% for member in controller.message_queue.members -%}
-                             {{ controller.message_queue.user }}:{{ controller.message_queue.password }}@{{ member.host }}:{{ member.get('port', rabbit_port) }}
+{%- if cfg.message_queue.members is defined %}
+transport_url = rabbit://{% for member in cfg.message_queue.members -%}
+                             {{ cfg.message_queue.user }}:{{ cfg.message_queue.password }}@{{ member.host }}:{{ member.get('port', rabbit_port) }}
                              {%- if not loop.last -%},{%- endif -%}
                          {%- endfor -%}
-                             /{{ controller.message_queue.virtual_host }}
+                             /{{ cfg.message_queue.virtual_host }}
 {%- else %}
-transport_url = rabbit://{{ controller.message_queue.user }}:{{ controller.message_queue.password }}@{{ controller.message_queue.host }}:{{ rabbit_port}}/{{ controller.message_queue.virtual_host }}
+transport_url = rabbit://{{ cfg.message_queue.user }}:{{ cfg.message_queue.password }}@{{ cfg.message_queue.host }}:{{ rabbit_port}}/{{ cfg.message_queue.virtual_host }}
 {%- endif %}
 
 
@@ -3385,7 +3385,7 @@ use_forwarded_for=false
 # Minimum value: 0
 # Deprecated group/name - [DEFAULT]/osapi_max_limit
 #max_limit=1000
-max_limit={{ controller.osapi_max_limit|default('1000') }}
+max_limit={{ cfg.osapi_max_limit|default('1000') }}
 
 #
 # This string is prepended to the normal URL that is returned in links to the
@@ -3481,6 +3481,7 @@ fping_path=/usr/sbin/fping
 #enable_instance_password=true
 
 
+{%- if controller.get('enabled') or api.get('enabled') %}
 [api_database]
 #
 # The *Nova API Database* is a separate database which is used for information
@@ -3490,17 +3491,17 @@ fping_path=/usr/sbin/fping
 #
 # From nova.conf
 #
-idle_timeout = {{ controller.database.get('idle_timeout', 180) }}
-min_pool_size = {{ controller.database.get('min_pool_size', 100) }}
-max_pool_size = {{ controller.database.get('max_pool_size', 700) }}
-max_overflow = {{ controller.database.get('max_overflow', 100) }}
-retry_interval = {{ controller.database.get('retry_interval', 5) }}
-max_retries = {{ controller.database.get('max_retries', '-1') }}
-db_max_retries = {{ controller.database.get('db_max_retries', 3) }}
-db_retry_interval = {{ controller.database.get('db_retry_interval', 1) }}
-connection_debug = {{ controller.database.get('connection_debug', 10) }}
-pool_timeout = {{ controller.database.get('pool_timeout', 120) }}
-connection = {{ controller.database.engine }}+pymysql://{{ controller.database.user }}:{{ controller.database.password }}@{{ controller.database.host }}/{{ controller.database.name }}_api?charset=utf8{{ connection_x509_ssl_option|string }}
+idle_timeout = {{ cfg.database.get('idle_timeout', 180) }}
+min_pool_size = {{ cfg.database.get('min_pool_size', 100) }}
+max_pool_size = {{ cfg.database.get('max_pool_size', 700) }}
+max_overflow = {{ cfg.database.get('max_overflow', 100) }}
+retry_interval = {{ cfg.database.get('retry_interval', 5) }}
+max_retries = {{ cfg.database.get('max_retries', '-1') }}
+db_max_retries = {{ cfg.database.get('db_max_retries', 3) }}
+db_retry_interval = {{ cfg.database.get('db_retry_interval', 1) }}
+connection_debug = {{ cfg.database.get('connection_debug', 10) }}
+pool_timeout = {{ cfg.database.get('pool_timeout', 120) }}
+connection = {{ cfg.database.engine }}+pymysql://{{ cfg.database.user }}:{{ cfg.database.password }}@{{ cfg.database.host }}/{{ cfg.database.name }}_api?charset=utf8{{ connection_x509_ssl_option|string }}
 
 # The SQLAlchemy connection string to use to connect to the database. (string
 # value)
@@ -3545,6 +3546,7 @@ connection = {{ controller.database.engine }}+pymysql://{{ controller.database.u
 
 # If set, use this value for pool_timeout with SQLAlchemy. (integer value)
 #pool_timeout=<None>
+{%- endif %}
 
 
 [barbican]
@@ -3561,10 +3563,10 @@ connection = {{ controller.database.engine }}+pymysql://{{ controller.database.u
 #barbican_api_version=<None>
 
 # Use this endpoint to connect to Keystone (string value)
-{%- if controller.get('barbican', {}).get('enabled', False) %}
-auth_endpoint={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.get('host', 'localhost') }}:{{ controller.identity.get('port', '5000') }}/v3
-{%- if controller.identity.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+{%- if cfg.get('barbican', {}).get('enabled', False) %}
+auth_endpoint={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.get('host', 'localhost') }}:{{ cfg.identity.get('port', '5000') }}/v3
+{%- if cfg.identity.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 {%- endif %}
 
@@ -3581,10 +3583,10 @@ cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
 #
 # From nova.conf
 #
-{%- if controller.cache is defined %}
+{%- if cfg.cache is defined %}
 enabled = true
 backend = oslo_cache.memcache_pool
-memcache_servers={%- for member in controller.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
+memcache_servers={%- for member in cfg.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
 {%- endif %}
 # Prefix for building the configuration dictionary for the cache region. This
 # should not need to be changed unless there is another dogpile.cache region
@@ -4137,8 +4139,8 @@ enable=False
 #  (string value)
 #catalog_info=volumev2:cinderv2:publicURL
 catalog_info=volumev2:cinderv2:internalURL
-{%- if controller.glance.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+{%- if cfg.glance.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 #
 # If this option is set then it will override service catalog lookup with
@@ -4167,7 +4169,7 @@ cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
 # * Any string representing region name
 #  (string value)
 #os_region_name=<None>
-os_region_name = {{ controller.identity.region }}
+os_region_name = {{ cfg.identity.region }}
 
 #
 # Number of times cinderclient should retry on any failed http call.
@@ -4197,8 +4199,8 @@ os_region_name = {{ controller.identity.region }}
 # By default there is no availability zone restriction on volume attach.
 #  (boolean value)
 #cross_az_attach=true
-{%- if controller.cross_az_attach is defined %}
-cross_az_attach={{ controller.cross_az_attach }}
+{%- if cfg.cross_az_attach is defined %}
+cross_az_attach={{ cfg.cross_az_attach }}
 {%- endif %}
 
 [cloudpipe]
@@ -4322,7 +4324,7 @@ cross_az_attach={{ controller.cross_az_attach }}
 # number of CPUs available.
 #  (integer value)
 #workers=<None>
-workers = {{ controller.get('conductor', {}).get('workers', controller.workers) }}
+workers = {{ cfg.get('conductor', {}).get('workers', cfg.workers) }}
 
 [console]
 #
@@ -4367,11 +4369,13 @@ workers = {{ controller.get('conductor', {}).get('workers', controller.workers) 
 # Minimum value: 0
 # Deprecated group/name - [DEFAULT]/console_token_ttl
 #token_ttl=600
-{% if controller.consoleauth_token_ttl is defined %}
-{%- set token_ttl = controller.consoleauth_token_ttl %}
+{% if cfg.consoleauth_token_ttl is defined %}
+{%- set token_ttl = cfg.consoleauth_token_ttl %}
 token_ttl = {{ token_ttl }}
-{%- elif controller.get('consoleauth', {}).token_ttl is defined %}
-token_ttl = {{ controller.consoleauth.token_ttl }}
+{%- elif cfg.get('consoleauth', {}).token_ttl is defined %}
+token_ttl = {{ cfg.consoleauth.token_ttl }}
+{%- elif consoleauth.token_ttl is defined %}
+token_ttl = {{ consoleauth.token_ttl }}
 {% endif %}
 
 [cors]
@@ -4384,40 +4388,40 @@ token_ttl = {{ controller.consoleauth.token_ttl }}
 # requests "origin" header. Format: "<protocol>://<host>[:<port>]", no trailing
 # slash. Example: https://horizon.example.com (list value)
 #allowed_origin=<None>
-{% if controller.cors.allowed_origin is defined %}
-allowed_origin = {{ controller.cors.allowed_origin }}
+{% if cfg.cors.allowed_origin is defined %}
+allowed_origin = {{ cfg.cors.allowed_origin }}
 {% endif %}
 
 # Indicate that the actual request can include user credentials (boolean value)
 #allow_credentials=true
-{% if controller.cors.allow_credentials is defined %}
-allow_credentials = {{ controller.cors.allow_credentials }}
+{% if cfg.cors.allow_credentials is defined %}
+allow_credentials = {{ cfg.cors.allow_credentials }}
 {% endif %}
 
 # Indicate which headers are safe to expose to the API. Defaults to HTTP Simple
 # Headers. (list value)
 #expose_headers=X-Auth-Token,X-Openstack-Request-Id,X-Subject-Token,X-Service-Token
-{% if controller.cors.expose_headers is defined %}
-expose_headers = {{ controller.cors.expose_headers }}
+{% if cfg.cors.expose_headers is defined %}
+expose_headers = {{ cfg.cors.expose_headers }}
 {% endif %}
 
 # Maximum cache age of CORS preflight requests. (integer value)
 #max_age=3600
-{% if controller.cors.max_age is defined %}
-max_age = {{ controller.cors.max_age }}
+{% if cfg.cors.max_age is defined %}
+max_age = {{ cfg.cors.max_age }}
 {% endif %}
 
 # Indicate which methods can be used during the actual request. (list value)
 #allow_methods=GET,PUT,POST,DELETE,PATCH
-{% if controller.cors.allow_methods is defined %}
-allow_methods = {{ controller.cors.allow_methods }}
+{% if cfg.cors.allow_methods is defined %}
+allow_methods = {{ cfg.cors.allow_methods }}
 {% endif %}
 
 # Indicate which header field names may be used during the actual request. (list
 # value)
 #allow_headers=X-Auth-Token,X-Openstack-Request-Id,X-Identity-Status,X-Roles,X-Service-Catalog,X-User-Id,X-Tenant-Id
-{% if controller.cors.allow_headers is defined %}
-allow_headers = {{ controller.cors.allow_headers }}
+{% if cfg.cors.allow_headers is defined %}
+allow_headers = {{ cfg.cors.allow_headers }}
 {% endif %}
 
 [cors.subdomain]
@@ -4544,17 +4548,17 @@ allow_headers = {{ controller.cors.allow_headers }}
 # Reason: Should use config option connection or slave_connection to connect the
 # database.
 #sqlite_db=oslo.sqlite
-idle_timeout = {{ controller.database.get('idle_timeout', 180) }}
-min_pool_size = {{ controller.database.get('min_pool_size', 100) }}
-max_pool_size = {{ controller.database.get('max_pool_size', 700) }}
-max_overflow = {{ controller.database.get('max_overflow', 100) }}
-retry_interval = {{ controller.database.get('retry_interval', 5) }}
-max_retries = {{ controller.database.get('max_retries', '-1') }}
-db_max_retries = {{ controller.database.get('db_max_retries', 3) }}
-db_retry_interval = {{ controller.database.get('db_retry_interval', 1) }}
-connection_debug = {{ controller.database.get('connection_debug', 10) }}
-pool_timeout = {{ controller.database.get('pool_timeout', 120) }}
-connection = {{ controller.database.engine }}+pymysql://{{ controller.database.user }}:{{ controller.database.password }}@{{ controller.database.host }}/{{ controller.database.name }}?charset=utf8{{ connection_x509_ssl_option|string }}
+idle_timeout = {{ cfg.database.get('idle_timeout', 180) }}
+min_pool_size = {{ cfg.database.get('min_pool_size', 100) }}
+max_pool_size = {{ cfg.database.get('max_pool_size', 700) }}
+max_overflow = {{ cfg.database.get('max_overflow', 100) }}
+retry_interval = {{ cfg.database.get('retry_interval', 5) }}
+max_retries = {{ cfg.database.get('max_retries', '-1') }}
+db_max_retries = {{ cfg.database.get('db_max_retries', 3) }}
+db_retry_interval = {{ cfg.database.get('db_retry_interval', 1) }}
+connection_debug = {{ cfg.database.get('connection_debug', 10) }}
+pool_timeout = {{ cfg.database.get('pool_timeout', 120) }}
+connection = {{ cfg.database.engine }}+pymysql://{{ cfg.database.user }}:{{ cfg.database.password }}@{{ cfg.database.host }}/{{ cfg.database.name }}?charset=utf8{{ connection_x509_ssl_option|string }}
 
 # If True, SQLite uses synchronous mode. (boolean value)
 # Deprecated group/name - [DEFAULT]/sqlite_synchronous
@@ -4811,7 +4815,7 @@ max_instances_per_host=50
 #available_filters=nova.scheduler.filters.all_filters
 available_filters=nova.scheduler.filters.all_filters
 available_filters=nova.scheduler.filters.pci_passthrough_filter.PciPassthroughFilter
-{% for filter in controller.get('scheduler_custom_filters', []) %}
+{% for filter in cfg.get('scheduler_custom_filters', []) %}
 available_filters = {{ filter }}
 {% endfor %}
 
@@ -4841,7 +4845,7 @@ available_filters = {{ filter }}
 #  (list value)
 # Deprecated group/name - [DEFAULT]/scheduler_default_filters
 #enabled_filters=RetryFilter,AvailabilityZoneFilter,RamFilter,DiskFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter
-enabled_filters={{ controller.scheduler_default_filters }}
+enabled_filters={{ cfg.scheduler_default_filters }}
 
 #
 # Filters used for filtering baremetal hosts.
@@ -5137,7 +5141,7 @@ use_baremetal_filters=false
 #   (i.e. "http://10.0.1.0:9292" or "https://my.glance.server/image").
 #  (list value)
 #api_servers=<None>
-api_servers = {{ controller.glance.get('protocol', 'http') }}://{{ controller.glance.host }}:{{ controller.glance.get('port', 9292) }}
+api_servers = {{ cfg.glance.get('protocol', 'http') }}://{{ cfg.glance.host }}:{{ cfg.glance.get('port', 9292) }}
 
 #
 # Enable insecure SSL (https) requests to glance.
@@ -5186,7 +5190,7 @@ api_servers = {{ controller.glance.get('protocol', 'http') }}://{{ controller.gl
 # * The options in the `key_manager` group, as the key_manager is used
 #   for the signature validation.
 #  (boolean value)
-{%- if controller.get('barbican', {}).get('enabled', False) %}
+{%- if cfg.get('barbican', {}).get('enabled', False) %}
 verify_glance_signatures=true
 {%- else %}
 #verify_glance_signatures=false
@@ -5592,7 +5596,7 @@ verify_glance_signatures=true
 #filesystems =
 
 
-{% if controller.ironic is defined -%}
+{% if cfg.ironic is defined -%}
 [ironic]
 #
 # Configuration options for Ironic driver (Bare Metal).
@@ -5610,7 +5614,7 @@ verify_glance_signatures=true
 #
 
 # URL override for the Ironic API endpoint. (string value)
-api_endpoint={{ controller.ironic.get('protocol', 'http') }}://{{ controller.ironic.host }}:{{ controller.ironic.port }}
+api_endpoint={{ cfg.ironic.get('protocol', 'http') }}://{{ cfg.ironic.host }}:{{ cfg.ironic.port }}
 
 #
 # The number of times to retry when a request conflicts.
@@ -5640,8 +5644,8 @@ api_endpoint={{ controller.ironic.get('protocol', 'http') }}://{{ controller.iro
 
 # PEM encoded Certificate Authority to use when verifying HTTPs connections.
 # (string value)
-{%- if controller.ironic.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+{%- if cfg.ironic.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 
 # PEM encoded client certificate key file (string value)
@@ -5655,13 +5659,13 @@ cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
 
 # Authentication type to load (string value)
 # Deprecated group/name - [ironic]/auth_plugin
-auth_type={{ controller.ironic.auth_type }}
+auth_type={{ cfg.ironic.auth_type }}
 
 # Config Section from which to load plugin specific options (string value)
 #auth_section=<None>
 
 # Authentication URL (string value)
-auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:{{ controller.identity.port }}/v3
+auth_url={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:{{ cfg.identity.port }}/v3
 
 # Domain ID to scope to (string value)
 #domain_id=<None>
@@ -5673,13 +5677,13 @@ auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.ident
 #project_id=<None>
 
 # Project name to scope to (string value)
-project_name={{ controller.identity.tenant }}
+project_name={{ cfg.identity.tenant }}
 
 # Domain ID containing project (string value)
 #project_domain_id=<None>
 
 # Domain name containing project (string value)
-project_domain_name={{ controller.ironic.project_domain_name }}
+project_domain_name={{ cfg.ironic.project_domain_name }}
 
 # Trust ID (string value)
 #trust_id=<None>
@@ -5689,16 +5693,16 @@ project_domain_name={{ controller.ironic.project_domain_name }}
 
 # Username (string value)
 # Deprecated group/name - [ironic]/user-name
-username={{ controller.ironic.user }}
+username={{ cfg.ironic.user }}
 
 # User's domain id (string value)
 #user_domain_id=<None>
 
 # User's domain name (string value)
-user_domain_name={{ controller.ironic.user_domain_name }}
+user_domain_name={{ cfg.ironic.user_domain_name }}
 
 # User's password (string value)
-password={{ controller.ironic.password }}
+password={{ cfg.ironic.password }}
 {%- endif %}
 
 
@@ -5719,7 +5723,7 @@ password={{ controller.ironic.password }}
 #fixed_key=<None>
 
 # The full class name of the key manager API class (string value)
-{%- if controller.get('barbican', {}).get('enabled', False) %}
+{%- if cfg.get('barbican', {}).get('enabled', False) %}
 api_class=castellan.key_manager.barbican_key_manager.BarbicanKeyManager
 {%- endif %}
 
@@ -5793,24 +5797,24 @@ api_class=castellan.key_manager.barbican_key_manager.BarbicanKeyManager
 revocation_cache_time = 10
 signing_dir=/tmp/keystone-signing-nova
 auth_type = password
-user_domain_id = {{ controller.identity.get('domain', 'default') }}
-project_domain_id = {{ controller.identity.get('domain', 'default') }}
-project_name = {{ controller.identity.tenant }}
-username = {{ controller.identity.user }}
-password = {{ controller.identity.password }}
-auth_uri={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:5000
-auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:35357
-{%- if controller.identity.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+user_domain_id = {{ cfg.identity.get('domain', 'default') }}
+project_domain_id = {{ cfg.identity.get('domain', 'default') }}
+project_name = {{ cfg.identity.tenant }}
+username = {{ cfg.identity.user }}
+password = {{ cfg.identity.password }}
+auth_uri={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:5000
+auth_url={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:35357
+{%- if cfg.identity.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
-{%- if controller.cache is defined %}
-memcached_servers={%- for member in controller.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
-  {%- if controller.cache.get('security', {}).get('enabled', False) %}
-memcache_security_strategy = {{ controller.cache.security.get('strategy', 'ENCRYPT') }}
-    {%- if controller.cache.security.secret_key is not defined or not controller.cache.security.secret_key %}
-    {%- do salt.test.exception('controller.cache.security.secret_key is not defined: Please add secret_key') %}
+{%- if cfg.cache is defined %}
+memcached_servers={%- for member in cfg.cache.members %}{{ member.host }}:11211{% if not loop.last %},{% endif %}{%- endfor %}
+  {%- if cfg.cache.get('security', {}).get('enabled', False) %}
+memcache_security_strategy = {{ cfg.cache.security.get('strategy', 'ENCRYPT') }}
+    {%- if cfg.cache.security.secret_key is not defined or not cfg.cache.security.secret_key %}
+    {%- do salt.test.exception('cfg.cache.security.secret_key is not defined: Please add secret_key') %}
     {%- else %}
-memcache_secret_key = {{ controller.cache.security.secret_key }}
+memcache_secret_key = {{ cfg.cache.security.secret_key }}
     {%- endif %}
   {%- endif %}
 {%- endif %}
@@ -6431,8 +6435,8 @@ use_usb_tablet=true
 #     * live_migration_permit_post_copy
 #  (boolean value)
 #live_migration_permit_auto_converge=false
-{%- if controller.get('libvirt', {}).live_migration_permit_auto_converge is defined %}
-live_migration_permit_auto_converge={{ controller.libvirt.live_migration_permit_auto_converge|lower }}
+{%- if cfg.get('libvirt', {}).live_migration_permit_auto_converge is defined %}
+live_migration_permit_auto_converge={{ cfg.libvirt.live_migration_permit_auto_converge|lower }}
 {%- endif %}
 
 #
@@ -6809,8 +6813,8 @@ use_virtio_for_bridges=true
 # * Any string representing mount options separated by commas.
 # * Example string: vers=3,lookupcache=pos
 #  (string value)
-{%- if controller.nfs_mount_options is defined %}
-nfs_mount_options="{{ controller.nfs_mount_options }}"
+{%- if cfg.nfs_mount_options is defined %}
+nfs_mount_options="{{ cfg.nfs_mount_options }}"
 {%- endif %}
 
 #
@@ -7193,23 +7197,23 @@ nfs_mount_options="{{ controller.nfs_mount_options }}"
 auth_type=v3password
 project_domain_name = Default
 user_domain_name = Default
-auth_url = {{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:35357/v3
+auth_url = {{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:35357/v3
 {% if pillar.neutron is defined and pillar.neutron.server is defined %}
 password={{ pillar.neutron.server.identity.password }}
 project_name={{ pillar.neutron.server.identity.tenant }}
 username={{ pillar.neutron.server.identity.user }}
 region_name= {{ pillar.neutron.server.identity.region }}
 {%- else %}
-password={{ controller.network.password }}
-project_name={{ controller.network.tenant }}
-username={{ controller.network.user }}
-region_name= {{ controller.network.region }}
+password={{ cfg.network.password }}
+project_name={{ cfg.network.tenant }}
+username={{ cfg.network.user }}
+region_name= {{ cfg.network.region }}
 {%- endif %}
-url={{ controller.network.get('protocol', 'http') }}://{{ controller.network.host }}:{{ controller.network.port }}
-{%- if controller.network.get('protocol', 'http') == 'https' %}
-cafile={{ controller.network.get('cacert_file', controller.cacert_file) }}
+url={{ cfg.network.get('protocol', 'http') }}://{{ cfg.network.host }}:{{ cfg.network.port }}
+{%- if cfg.network.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.network.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
-metadata_proxy_shared_secret={{ controller.metadata.password }}
+metadata_proxy_shared_secret={{ cfg.metadata.password }}
 service_metadata_proxy=True
 #
 # This option specifies the URL for connecting to Neutron.
@@ -7383,8 +7387,8 @@ service_metadata_proxy=True
 # Allowed values: <None>, vm_state, vm_and_task_state
 # Deprecated group/name - [DEFAULT]/notify_on_state_change
 #notify_on_state_change=<None>
-{%- if controller.get('notification', {}).notify_on is defined %}
-{%- for key, value in controller.notification.notify_on.iteritems() %}
+{%- if cfg.get('notification', {}).notify_on is defined %}
+{%- for key, value in cfg.notification.notify_on.iteritems() %}
 notify_on_{{ key }} = {{ value }}
 {%- endfor %}
 {%- endif %}
@@ -7594,8 +7598,8 @@ lock_path=/var/lib/nova/tmp
 # Seconds to pause before attempting to re-connect. (integer value)
 # Minimum value: 1
 #connection_retry_interval=1
-{%- if controller.message_queue.connection_retry_interval is defined %}
-connection_retry_interval = {{ controller.message_queue.connection_retry_interval }}
+{%- if cfg.message_queue.connection_retry_interval is defined %}
+connection_retry_interval = {{ cfg.message_queue.connection_retry_interval }}
 {%- endif %}
 
 
@@ -7603,63 +7607,63 @@ connection_retry_interval = {{ controller.message_queue.connection_retry_interva
 # unsuccessful failover attempt. (integer value)
 # Minimum value: 0
 #connection_retry_backoff=2
-{%- if controller.message_queue.connection_retry_backoff is defined %}
-connection_retry_backoff = {{ controller.message_queue.connection_retry_backoff }}
+{%- if cfg.message_queue.connection_retry_backoff is defined %}
+connection_retry_backoff = {{ cfg.message_queue.connection_retry_backoff }}
 {%- endif %}
 
 # Maximum limit for connection_retry_interval + connection_retry_backoff
 # (integer value)
 # Minimum value: 1
 #connection_retry_interval_max=30
-{%- if controller.message_queue.connection_retry_interval_max is defined %}
-connection_retry_interval_max = {{ controller.message_queue.connection_retry_interval_max }}
+{%- if cfg.message_queue.connection_retry_interval_max is defined %}
+connection_retry_interval_max = {{ cfg.message_queue.connection_retry_interval_max }}
 {%- endif %}
 
 # Time to pause between re-connecting an AMQP 1.0 link that failed due to a
 # recoverable error. (integer value)
 # Minimum value: 1
 #link_retry_delay=10
-{%- if controller.message_queue.link_retry_delay is defined %}
-link_retry_delay = {{ controller.message_queue.link_retry_delay }}
+{%- if cfg.message_queue.link_retry_delay is defined %}
+link_retry_delay = {{ cfg.message_queue.link_retry_delay }}
 {%- endif %}
 
 # The maximum number of attempts to re-send a reply message which failed due to
 # a recoverable error. (integer value)
 # Minimum value: -1
 #default_reply_retry=0
-{%- if controller.message_queue.default_reply_retry is defined %}
-default_reply_retry = {{ controller.message_queue.default_reply_retry }}
+{%- if cfg.message_queue.default_reply_retry is defined %}
+default_reply_retry = {{ cfg.message_queue.default_reply_retry }}
 {%- endif %}
 
 # The deadline for an rpc reply message delivery. (integer value)
 # Minimum value: 5
 #default_reply_timeout=30
-{%- if controller.message_queue.default_reply_timeout is defined %}
-default_reply_timeout = {{ controller.message_queue.default_reply_timeout }}
+{%- if cfg.message_queue.default_reply_timeout is defined %}
+default_reply_timeout = {{ cfg.message_queue.default_reply_timeout }}
 {%- endif %}
 
 # The deadline for an rpc cast or call message delivery. Only used when caller
 # does not provide a timeout expiry. (integer value)
 # Minimum value: 5
 #default_send_timeout=30
-{%- if controller.message_queue.default_send_timeout is defined %}
-default_send_timeout = {{ controller.message_queue.default_send_timeout }}
+{%- if cfg.message_queue.default_send_timeout is defined %}
+default_send_timeout = {{ cfg.message_queue.default_send_timeout }}
 {%- endif %}
 
 # The deadline for a sent notification message delivery. Only used when caller
 # does not provide a timeout expiry. (integer value)
 # Minimum value: 5
 #default_notify_timeout=30
-{%- if controller.message_queue.default_notify_timeout is defined %}
-default_notify_timeout = {{ controller.message_queue.default_notify_timeout }}
+{%- if cfg.message_queue.default_notify_timeout is defined %}
+default_notify_timeout = {{ cfg.message_queue.default_notify_timeout }}
 {%- endif %}
 
 # The duration to schedule a purge of idle sender links. Detach link after
 # expiry. (integer value)
 # Minimum value: 1
 #default_sender_link_timeout=600
-{%- if controller.message_queue.default_sender_link_timeout is defined %}
-default_sender_link_timeout = {{ controller.message_queue.default_sender_link_timeout }}
+{%- if cfg.message_queue.default_sender_link_timeout is defined %}
+default_sender_link_timeout = {{ cfg.message_queue.default_sender_link_timeout }}
 {%- endif %}
 
 # Indicates the addressing mode used by the driver.
@@ -7801,12 +7805,12 @@ default_sender_link_timeout = {{ controller.message_queue.default_sender_link_ti
 # messagingv2, routing, log, test, noop (multi valued)
 # Deprecated group/name - [DEFAULT]/notification_driver
 #driver =
-{%- if controller.notification is mapping %}
-driver = {{ controller.notification.get('driver', 'messagingv2') }}
-{%- if controller.notification.topics is defined %}
-topics = {{ controller.notification.topics }}
+{%- if cfg.notification is mapping %}
+driver = {{ cfg.notification.get('driver', 'messagingv2') }}
+{%- if cfg.notification.topics is defined %}
+topics = {{ cfg.notification.topics }}
 {%- endif %}
-{%- elif controller.notification %}
+{%- elif cfg.notification %}
 driver=messagingv2
 {%- endif %}
 
@@ -7929,8 +7933,8 @@ driver=messagingv2
 
 # How frequently to retry connecting with RabbitMQ. (integer value)
 #rabbit_retry_interval=1
-{%- if controller.message_queue.rabbit_retry_interval is defined %}
-rabbit_retry_interval = {{ controller.message_queue.rabbit_retry_interval }}
+{%- if cfg.message_queue.rabbit_retry_interval is defined %}
+rabbit_retry_interval = {{ cfg.message_queue.rabbit_retry_interval }}
 {%- endif %}
 
 
@@ -7938,16 +7942,16 @@ rabbit_retry_interval = {{ controller.message_queue.rabbit_retry_interval }}
 # value)
 # Deprecated group/name - [DEFAULT]/rabbit_retry_backoff
 #rabbit_retry_backoff=2
-{%- if controller.message_queue.rabbit_retry_backoff is defined %}
-rabbit_retry_backoff = {{ controller.message_queue.rabbit_retry_backoff }}
+{%- if cfg.message_queue.rabbit_retry_backoff is defined %}
+rabbit_retry_backoff = {{ cfg.message_queue.rabbit_retry_backoff }}
 {%- endif %}
 
 
 # Maximum interval of RabbitMQ connection retries. Default is 30 seconds.
 # (integer value)
 #rabbit_interval_max=30
-{%- if controller.message_queue.rabbit_interval_max is defined %}
-rabbit_interval_max = {{ controller.message_queue.rabbit_interval_max }}
+{%- if cfg.message_queue.rabbit_interval_max is defined %}
+rabbit_interval_max = {{ cfg.message_queue.rabbit_interval_max }}
 {%- endif %}
 
 
@@ -7957,8 +7961,8 @@ rabbit_interval_max = {{ controller.message_queue.rabbit_interval_max }}
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #rabbit_max_retries=0
-{%- if controller.message_queue.rabbit_max_retries is defined %}
-rabbit_max_retries = {{ controller.message_queue.rabbit_max_retries }}
+{%- if cfg.message_queue.rabbit_max_retries is defined %}
+rabbit_max_retries = {{ cfg.message_queue.rabbit_max_retries }}
 {%- endif %}
 
 # Try to use HA queues in RabbitMQ (x-ha-policy: all). If you change this
@@ -7975,55 +7979,55 @@ rabbit_max_retries = {{ controller.message_queue.rabbit_max_retries }}
 # The parameter affects only reply and fanout queues. (integer value)
 # Minimum value: 1
 #rabbit_transient_queues_ttl=1800
-{%- if controller.message_queue.rabbit_transient_queues_ttl is defined %}
-rabbit_transient_queues_ttl = {{ controller.message_queue.rabbit_transient_queues_ttl }}
+{%- if cfg.message_queue.rabbit_transient_queues_ttl is defined %}
+rabbit_transient_queues_ttl = {{ cfg.message_queue.rabbit_transient_queues_ttl }}
 {%- endif %}
 
 # Specifies the number of messages to prefetch. Setting to zero allows unlimited
 # messages. (integer value)
 #rabbit_qos_prefetch_count=0
-{%- if controller.message_queue.rabbit_qos_prefetch_count is defined %}
-rabbit_qos_prefetch_count = {{ controller.message_queue.rabbit_qos_prefetch_count }}
+{%- if cfg.message_queue.rabbit_qos_prefetch_count is defined %}
+rabbit_qos_prefetch_count = {{ cfg.message_queue.rabbit_qos_prefetch_count }}
 {%- endif %}
 
 # Number of seconds after which the Rabbit broker is considered down if
 # heartbeat's keep-alive fails (0 disable the heartbeat). EXPERIMENTAL (integer
 # value)
 #heartbeat_timeout_threshold=60
-{%- if controller.message_queue.heartbeat_timeout_threshold is defined %}
-heartbeat_timeout_threshold = {{ controller.message_queue.heartbeat_timeout_threshold }}
+{%- if cfg.message_queue.heartbeat_timeout_threshold is defined %}
+heartbeat_timeout_threshold = {{ cfg.message_queue.heartbeat_timeout_threshold }}
 {%- endif %}
 
 # How often times during the heartbeat_timeout_threshold we check the heartbeat.
 # (integer value)
 #heartbeat_rate=2
-{%- if controller.message_queue.heartbeat_rate is defined %}
-heartbeat_rate = {{ controller.message_queue.heartbeat_rate }}
+{%- if cfg.message_queue.heartbeat_rate is defined %}
+heartbeat_rate = {{ cfg.message_queue.heartbeat_rate }}
 {%- endif %}
 
 # Deprecated, use rpc_backend=kombu+memory or rpc_backend=fake (boolean value)
 # Deprecated group/name - [DEFAULT]/fake_rabbit
 #fake_rabbit=false
-{%- if controller.message_queue.fake_rabbit is defined %}
-fake_rabbit = {{ controller.message_queue.fake_rabbit }}
+{%- if cfg.message_queue.fake_rabbit is defined %}
+fake_rabbit = {{ cfg.message_queue.fake_rabbit }}
 {%- endif %}
 
 # Maximum number of channels to allow (integer value)
 #channel_max=<None>
-{%- if controller.message_queue.channel_max is defined %}
-channel_max = {{ controller.message_queue.channel_max }}
+{%- if cfg.message_queue.channel_max is defined %}
+channel_max = {{ cfg.message_queue.channel_max }}
 {%- endif %}
 
 # The maximum byte size for an AMQP frame (integer value)
 #frame_max=<None>
-{%- if controller.message_queue.frame_max is defined %}
-frame_max = {{ controller.message_queue.frame_max }}
+{%- if cfg.message_queue.frame_max is defined %}
+frame_max = {{ cfg.message_queue.frame_max }}
 {%- endif %}
 
 # How often to send heartbeats for consumer's connections (integer value)
 #heartbeat_interval=3
-{%- if controller.message_queue.heartbeat_interval is defined %}
-heartbeat_interval = {{ controller.message_queue.heartbeat_interval }}
+{%- if cfg.message_queue.heartbeat_interval is defined %}
+heartbeat_interval = {{ cfg.message_queue.heartbeat_interval }}
 {%- endif %}
 
 # Enable SSL (boolean value)
@@ -8034,21 +8038,21 @@ heartbeat_interval = {{ controller.message_queue.heartbeat_interval }}
 
 # Set socket timeout in seconds for connection's socket (floating point value)
 #socket_timeout=0.25
-{%- if controller.message_queue.socket_timeout is defined %}
-socket_timeout = {{ controller.message_queue.socket_timeout }}
+{%- if cfg.message_queue.socket_timeout is defined %}
+socket_timeout = {{ cfg.message_queue.socket_timeout }}
 {%- endif %}
 
 # Set TCP_USER_TIMEOUT in seconds for connection's socket (floating point value)
 #tcp_user_timeout=0.25
-{%- if controller.message_queue.tcp_user_timeout is defined %}
-tcp_user_timeout = {{ controller.message_queue.tcp_user_timeout }}
+{%- if cfg.message_queue.tcp_user_timeout is defined %}
+tcp_user_timeout = {{ cfg.message_queue.tcp_user_timeout }}
 {%- endif %}
 
 # Set delay for reconnection to some host which has connection error (floating
 # point value)
 #host_connection_reconnect_delay=0.25
-{%- if controller.message_queue.host_connection_reconnect_delay is defined %}
-host_connection_reconnect_delay = {{ controller.message_queue.host_connection_reconnect_delay }}
+{%- if cfg.message_queue.host_connection_reconnect_delay is defined %}
+host_connection_reconnect_delay = {{ cfg.message_queue.host_connection_reconnect_delay }}
 {%- endif %}
 
 # Connection factory implementation (string value)
@@ -8057,159 +8061,159 @@ host_connection_reconnect_delay = {{ controller.message_queue.host_connection_re
 
 # Maximum number of connections to keep queued. (integer value)
 #pool_max_size=30
-{%- if controller.message_queue.pool_max_size is defined %}
-pool_max_size = {{ controller.message_queue.pool_max_size }}
+{%- if cfg.message_queue.pool_max_size is defined %}
+pool_max_size = {{ cfg.message_queue.pool_max_size }}
 {%- endif %}
 
 # Maximum number of connections to create above `pool_max_size`. (integer value)
 #pool_max_overflow=0
-{%- if controller.message_queue.pool_max_overflow is defined %}
-pool_max_overflow = {{ controller.message_queue.pool_max_overflow }}
+{%- if cfg.message_queue.pool_max_overflow is defined %}
+pool_max_overflow = {{ cfg.message_queue.pool_max_overflow }}
 {%- endif %}
 
 # Default number of seconds to wait for a connections to available (integer
 # value)
 #pool_timeout=30
-{%- if controller.message_queue.pool_timeout is defined %}
-pool_timeout = {{ controller.message_queue.pool_timeout }}
+{%- if cfg.message_queue.pool_timeout is defined %}
+pool_timeout = {{ cfg.message_queue.pool_timeout }}
 {%- endif %}
 
 # Lifetime of a connection (since creation) in seconds or None for no recycling.
 # Expired connections are closed on acquire. (integer value)
 #pool_recycle=600
-{%- if controller.message_queue.pool_recycle is defined %}
-pool_recycle = {{ controller.message_queue.pool_recycle }}
+{%- if cfg.message_queue.pool_recycle is defined %}
+pool_recycle = {{ cfg.message_queue.pool_recycle }}
 {%- endif %}
 
 # Threshold at which inactive (since release) connections are considered stale
 # in seconds or None for no staleness. Stale connections are closed on acquire.
 # (integer value)
 #pool_stale=60
-{%- if controller.message_queue.pool_stale is defined %}
-pool_stale = {{ controller.message_queue.pool_stale }}
+{%- if cfg.message_queue.pool_stale is defined %}
+pool_stale = {{ cfg.message_queue.pool_stale }}
 {%- endif %}
 
 # Default serialization mechanism for serializing/deserializing
 # outgoing/incoming messages (string value)
 # Allowed values: json, msgpack
 #default_serializer_type=json
-{%- if controller.message_queue.default_serializer_type is defined %}
-default_serializer_type = {{ controller.message_queue.default_serializer_type }}
+{%- if cfg.message_queue.default_serializer_type is defined %}
+default_serializer_type = {{ cfg.message_queue.default_serializer_type }}
 {%- endif %}
 
 # Persist notification messages. (boolean value)
 #notification_persistence=false
-{%- if controller.message_queue.notification_persistence is defined %}
-notification_persistence = {{ controller.message_queue.notification_persistence }}
+{%- if cfg.message_queue.notification_persistence is defined %}
+notification_persistence = {{ cfg.message_queue.notification_persistence }}
 {%- endif %}
 
 # Exchange name for sending notifications (string value)
 #default_notification_exchange=${control_exchange}_notification
-{%- if controller.message_queue.default_notification_exchange is defined %}
-default_notification_exchange = {{ controller.message_queue.default_notification_exchange }}
+{%- if cfg.message_queue.default_notification_exchange is defined %}
+default_notification_exchange = {{ cfg.message_queue.default_notification_exchange }}
 {%- endif %}
 
 # Max number of not acknowledged message which RabbitMQ can send to notification
 # listener. (integer value)
 #notification_listener_prefetch_count=100
-{%- if controller.message_queue.notification_listener_prefetch_count is defined %}
-notification_listener_prefetch_count = {{ controller.message_queue.notification_listener_prefetch_count }}
+{%- if cfg.message_queue.notification_listener_prefetch_count is defined %}
+notification_listener_prefetch_count = {{ cfg.message_queue.notification_listener_prefetch_count }}
 {%- endif %}
 
 # Reconnecting retry count in case of connectivity problem during sending
 # notification, -1 means infinite retry. (integer value)
 #default_notification_retry_attempts=-1
-{%- if controller.message_queue.default_notification_retry_attempts is defined %}
-default_notification_retry_attempts = {{ controller.message_queue.default_notification_retry_attempts }}
+{%- if cfg.message_queue.default_notification_retry_attempts is defined %}
+default_notification_retry_attempts = {{ cfg.message_queue.default_notification_retry_attempts }}
 {%- endif %}
 
 # Reconnecting retry delay in case of connectivity problem during sending
 # notification message (floating point value)
 #notification_retry_delay=0.25
-{%- if controller.message_queue.notification_retry_delay is defined %}
-notification_retry_delay = {{ controller.message_queue.notification_retry_delay }}
+{%- if cfg.message_queue.notification_retry_delay is defined %}
+notification_retry_delay = {{ cfg.message_queue.notification_retry_delay }}
 {%- endif %}
 
 # Time to live for rpc queues without consumers in seconds. (integer value)
 #rpc_queue_expiration=60
-{%- if controller.message_queue.rpc_queue_expiration is defined %}
-rpc_queue_expiration = {{ controller.message_queue.rpc_queue_expiration }}
+{%- if cfg.message_queue.rpc_queue_expiration is defined %}
+rpc_queue_expiration = {{ cfg.message_queue.rpc_queue_expiration }}
 {%- endif %}
 
 # Exchange name for sending RPC messages (string value)
 #default_rpc_exchange=${control_exchange}_rpc
-{%- if controller.message_queue.default_rpc_exchange is defined %}
-default_rpc_exchange = {{ controller.message_queue.default_rpc_exchange }}
+{%- if cfg.message_queue.default_rpc_exchange is defined %}
+default_rpc_exchange = {{ cfg.message_queue.default_rpc_exchange }}
 {%- endif %}
 
 # Exchange name for receiving RPC replies (string value)
 #rpc_reply_exchange=${control_exchange}_rpc_reply
-{%- if controller.message_queue.rpc_reply_exchange is defined %}
-rpc_reply_exchange = {{ controller.message_queue.rpc_reply_exchange }}
+{%- if cfg.message_queue.rpc_reply_exchange is defined %}
+rpc_reply_exchange = {{ cfg.message_queue.rpc_reply_exchange }}
 {%- endif %}
 
 # Max number of not acknowledged message which RabbitMQ can send to rpc
 # listener. (integer value)
 #rpc_listener_prefetch_count=100
-{%- if controller.message_queue.rpc_listener_prefetch_count is defined %}
-rpc_listener_prefetch_count = {{ controller.message_queue.rpc_listener_prefetch_count }}
+{%- if cfg.message_queue.rpc_listener_prefetch_count is defined %}
+rpc_listener_prefetch_count = {{ cfg.message_queue.rpc_listener_prefetch_count }}
 {%- endif %}
 
 # Max number of not acknowledged message which RabbitMQ can send to rpc reply
 # listener. (integer value)
 #rpc_reply_listener_prefetch_count=100
-{%- if controller.message_queue.rpc_reply_listener_prefetch_count is defined %}
-rpc_reply_listener_prefetch_count = {{ controller.message_queue.rpc_reply_listener_prefetch_count }}
+{%- if cfg.message_queue.rpc_reply_listener_prefetch_count is defined %}
+rpc_reply_listener_prefetch_count = {{ cfg.message_queue.rpc_reply_listener_prefetch_count }}
 {%- endif %}
 
 # Reconnecting retry count in case of connectivity problem during sending reply.
 # -1 means infinite retry during rpc_timeout (integer value)
 #rpc_reply_retry_attempts=-1
-{%- if controller.message_queue.rpc_reply_retry_attempts is defined %}
-rpc_reply_retry_attempts = {{ controller.message_queue.rpc_reply_retry_attempts }}
+{%- if cfg.message_queue.rpc_reply_retry_attempts is defined %}
+rpc_reply_retry_attempts = {{ cfg.message_queue.rpc_reply_retry_attempts }}
 {%- endif %}
 
 # Reconnecting retry delay in case of connectivity problem during sending reply.
 # (floating point value)
 #rpc_reply_retry_delay=0.25
-{%- if controller.message_queue.rpc_reply_retry_delay is defined %}
-rpc_reply_retry_delay = {{ controller.message_queue.rpc_reply_retry_delay }}
+{%- if cfg.message_queue.rpc_reply_retry_delay is defined %}
+rpc_reply_retry_delay = {{ cfg.message_queue.rpc_reply_retry_delay }}
 {%- endif %}
 
 # Reconnecting retry count in case of connectivity problem during sending RPC
 # message, -1 means infinite retry. If actual retry attempts in not 0 the rpc
 # request could be processed more than one time (integer value)
 #default_rpc_retry_attempts=-1
-{%- if controller.message_queue.default_rpc_retry_attempts is defined %}
-default_rpc_retry_attempts = {{ controller.message_queue.default_rpc_retry_attempts }}
+{%- if cfg.message_queue.default_rpc_retry_attempts is defined %}
+default_rpc_retry_attempts = {{ cfg.message_queue.default_rpc_retry_attempts }}
 {%- endif %}
 
 # Reconnecting retry delay in case of connectivity problem during sending RPC
 # message (floating point value)
 #rpc_retry_delay=0.25
-{%- if controller.message_queue.rpc_retry_delay is defined %}
-rpc_retry_delay = {{ controller.message_queue.rpc_retry_delay }}
+{%- if cfg.message_queue.rpc_retry_delay is defined %}
+rpc_retry_delay = {{ cfg.message_queue.rpc_retry_delay }}
 {%- endif %}
 
 {# rabbitmq ssl configuration #}
-{%- if controller.message_queue.get('ssl',{}).get('enabled', False) %}
+{%- if cfg.message_queue.get('ssl',{}).get('enabled', False) %}
 rabbit_use_ssl=true
 
-  {%- if controller.message_queue.ssl.version is defined %}
-kombu_ssl_version = {{ controller.message_queue.ssl.version }}
+  {%- if cfg.message_queue.ssl.version is defined %}
+kombu_ssl_version = {{ cfg.message_queue.ssl.version }}
   {%- elif salt['grains.get']('pythonversion') > [2,7,8] %}
 kombu_ssl_version = TLSv1_2
   {%- endif %}
 
-  {%- if controller.message_queue.get('x509',{}).get('enabled', False) %}
-kombu_ssl_ca_certs = {{ controller.message_queue.x509.ca_file}}
+  {%- if cfg.message_queue.get('x509',{}).get('enabled', False) %}
+kombu_ssl_ca_certs = {{ cfg.message_queue.x509.ca_file}}
 
-kombu_ssl_keyfile = {{ controller.message_queue.x509.key_file}}
+kombu_ssl_keyfile = {{ cfg.message_queue.x509.key_file}}
 
-kombu_ssl_certfile = {{ controller.message_queue.x509.cert_file}}
+kombu_ssl_certfile = {{ cfg.message_queue.x509.cert_file}}
 
   {%- else %}
-kombu_ssl_ca_certs = {{ controller.message_queue.ssl.get('cacert_file', controller.cacert_file) }}
+kombu_ssl_ca_certs = {{ cfg.message_queue.ssl.get('cacert_file', cfg.cacert_file) }}
   {%- endif %}
 
 {%- endif %}
@@ -8260,8 +8264,8 @@ kombu_ssl_ca_certs = {{ controller.message_queue.ssl.get('cacert_file', controll
 # exception when timeout expired. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_poll_timeout
 #rpc_poll_timeout=1
-{%- if controller.message_queue.rpc_poll_timeout is defined %}
-rpc_poll_timeout = {{ controller.message_queue.rpc_poll_timeout }}
+{%- if cfg.message_queue.rpc_poll_timeout is defined %}
+rpc_poll_timeout = {{ cfg.message_queue.rpc_poll_timeout }}
 {%- endif %}
 
 
@@ -8459,8 +8463,8 @@ enable_proxy_headers_parsing=True
 #  (multi valued)
 # Deprecated group/name - [DEFAULT]/pci_alias
 #alias =
-{%- if controller.get('pci', {}).get('alias', false) %}
-  {%- for alias_name, alias in controller.pci.alias.iteritems() %}
+{%- if cfg.get('pci', {}).get('alias', false) %}
+  {%- for alias_name, alias in cfg.pci.alias.iteritems() %}
 alias = {{ alias | json }}
   {%- endfor %}
 {%- endif %}
@@ -8529,8 +8533,8 @@ alias = {{ alias | json }}
 #  (multi valued)
 # Deprecated group/name - [DEFAULT]/pci_passthrough_whitelist
 #passthrough_whitelist =
-{%- if controller.get('pci', {}).get('passthrough_whitelist', false) %}
-  {%- for item in controller.pci.passthrough_whitelist %}
+{%- if cfg.get('pci', {}).get('passthrough_whitelist', false) %}
+  {%- for item in cfg.pci.passthrough_whitelist %}
 passthrough_whitelist = {{ item | json }}
   {%- endfor %}
 {%- endif %}
@@ -8550,16 +8554,16 @@ passthrough_whitelist = {{ item | json }}
 #
 # * Any string representing region name
 #  (string value)
-os_region_name = {{ controller.identity.region }}
+os_region_name = {{ cfg.identity.region }}
 auth_type = password
-user_domain_id = {{ controller.identity.get('domain', 'default') }}
-project_domain_id = {{ controller.identity.get('domain', 'default') }}
-project_name = {{ controller.identity.tenant }}
-username = {{ controller.identity.user }}
-password = {{ controller.identity.password }}
-auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:35357/v3
-{%- if controller.identity.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+user_domain_id = {{ cfg.identity.get('domain', 'default') }}
+project_domain_id = {{ cfg.identity.get('domain', 'default') }}
+project_name = {{ cfg.identity.tenant }}
+username = {{ cfg.identity.user }}
+password = {{ cfg.identity.password }}
+auth_url={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:35357/v3
+{%- if cfg.identity.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 os_interface = internal
 
@@ -9244,22 +9248,22 @@ discover_hosts_in_cells_interval=300
 #
 # From nova.conf
 #
-{%- if controller.get('service_user', {}).get('enabled', True) %}
+{%- if cfg.get('service_user', {}).get('enabled', True) %}
 send_service_user_token = True
 auth_type = password
-  {%- if controller.service_user is defined %}
-  {%- set _data=controller.service_user %}
+  {%- if cfg.service_user is defined %}
+  {%- set _data=cfg.service_user %}
   {%- else %}
-  {%- set _data=controller.identity %}
+  {%- set _data=cfg.identity %}
   {%- endif %}
 user_domain_id = {{ _data.get('domain', 'default') }}
 project_domain_id = {{ _data.get('domain', 'default') }}
 project_name = {{ _data.get('tenant', 'service') }}
 username = {{ _data.get('user', 'nova') }}
 password = {{ _data.password }}
-auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:5000
-  {%- if controller.identity.get('protocol', 'http') == 'https' %}
-cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
+auth_url={{ cfg.identity.get('protocol', 'http') }}://{{ cfg.identity.host }}:5000
+  {%- if cfg.identity.get('protocol', 'http') == 'https' %}
+cafile={{ cfg.identity.get('cacert_file', cfg.cacert_file) }}
   {%- endif %}
 {%- endif %}
 
@@ -9373,7 +9377,7 @@ cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
 # * update html5proxy_base_url
 # * update server_proxyclient_address
 enabled = false
-html5proxy_base_url = {{ controller.vncproxy_url }}/spice_auto.html
+html5proxy_base_url = {{ cfg.vncproxy_url }}/spice_auto.html
 #
 # From nova.conf
 #
@@ -9509,8 +9513,8 @@ html5proxy_base_url = {{ controller.vncproxy_url }}/spice_auto.html
 
 # CA certificate file to use to verify connecting clients. (string value)
 # Deprecated group/name - [DEFAULT]/ssl_ca_file
-{%- if controller.identity.get('protocol', 'http') == 'https' %}
-ca_file={{ controller.glance.get('cacert_file', controller.cacert_file) }}
+{%- if cfg.identity.get('protocol', 'http') == 'https' %}
+ca_file={{ cfg.glance.get('cacert_file', cfg.cacert_file) }}
 {%- endif %}
 
 # Certificate file to use when starting the server securely. (string value)
@@ -9716,8 +9720,8 @@ ca_file={{ controller.glance.get('cacert_file', controller.cacert_file) }}
 
 
 [upgrade_levels]
-{%- if controller.upgrade_levels is defined %}
-{%- for key, value in controller.upgrade_levels.iteritems() %}
+{%- if cfg.upgrade_levels is defined %}
+{%- for key, value in cfg.upgrade_levels.iteritems() %}
 {{ key }}={{ value }}
 {%- endfor %}
 {%- endif %}
@@ -9882,9 +9886,9 @@ ca_file={{ controller.glance.get('cacert_file', controller.cacert_file) }}
 # Tenant Name (string value)
 #tenant_name=<None>
 
-{%- set compute_driver = controller.get('compute_driver', 'libvirt.LibvirtDriver') %}
+{%- set compute_driver = cfg.get('compute_driver', 'libvirt.LibvirtDriver') %}
 {%- if compute_driver in compute_driver_mapping.keys() %}
-{%- set _data = controller.get(compute_driver_mapping[compute_driver]) %}
+{%- set _data = cfg.get(compute_driver_mapping[compute_driver]) %}
 {%- include "nova/files/pike/compute/_" + compute_driver_mapping[compute_driver] + ".conf" %}
 {%- endif %}
 
@@ -9961,16 +9965,16 @@ enabled=true
 # Deprecated group/name - [DEFAULT]/novncproxy_base_url
 #novncproxy_base_url=http://127.0.0.1:6080/vnc_auto.html
 enabled = true
-novncproxy_host = {{ controller.bind.get('novncproxy_address', '0.0.0.0') }}
-novncproxy_base_url = {{ controller.vncproxy_url }}/vnc_auto.html
-novncproxy_port={{ controller.bind.get('vncproxy_port', '6080') }}
+novncproxy_host = {{ cfg.bind.get('novncproxy_address', '0.0.0.0') }}
+novncproxy_base_url = {{ cfg.vncproxy_url }}/vnc_auto.html
+novncproxy_port={{ cfg.bind.get('vncproxy_port', '6080') }}
 {%- if pillar.nova.compute is defined %}
-vncserver_listen={{ controller.bind.private_address }}
-vncserver_proxyclient_address={{ controller.bind.private_address }}
+vncserver_listen={{ cfg.bind.private_address }}
+vncserver_proxyclient_address={{ cfg.bind.private_address }}
 {%- else %}
-vncserver_listen={{ controller.bind.get('novncproxy_address', '0.0.0.0') }}
+vncserver_listen={{ cfg.bind.get('novncproxy_address', '0.0.0.0') }}
 {%- endif %}
-keymap = {{ controller.get('vnc_keymap', 'en-us') }}
+keymap = {{ cfg.get('vnc_keymap', 'en-us') }}
 
 #
 # IP address or hostname that the XVP VNC console proxy should bind to.
@@ -10589,8 +10593,8 @@ api_paste_config=/etc/nova/api-paste.ini
 # Time in secs to wait for a block device to be created (integer value)
 # Minimum value: 1
 #block_device_creation_timeout=10
-{%- if controller.block_device_creation_timeout is defined %}
-block_device_creation_timeout = {{ controller.block_device_creation_timeout }}
+{%- if cfg.block_device_creation_timeout is defined %}
+block_device_creation_timeout = {{ cfg.block_device_creation_timeout }}
 {%- endif  %}
 
 #

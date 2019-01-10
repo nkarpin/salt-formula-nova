@@ -1,7 +1,7 @@
-{% from "nova/map.jinja" import controller with context %}
+{% from "nova/map.jinja" import cfg with context %}
 
 {%- set should_run = '/bin/false' %}
-{%- if not grains.get('noservices') and controller.version not in ["juno", "kilo", "liberty"] and controller.get('role', 'primary') == 'primary' %}
+{%- if not grains.get('noservices') and cfg.version not in ["juno", "kilo", "liberty"] and cfg.get('role', 'primary') == 'primary' %}
 {%- set should_run = '/bin/true' %}
 {%- endif %}
 

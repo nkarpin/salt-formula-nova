@@ -1,3 +1,5 @@
+{# the state is deprecated in in favor of db.api_sync.sls, db.cells, db.sync.sls #}
+
 {% from "nova/map.jinja" import controller with context %}
 
 {%- if controller.version not in ["juno", "kilo", "liberty"] %}
@@ -10,11 +12,9 @@ nova_controller_sync_apidb:
   - runas: 'nova'
   - require_in:
     - nova_controller_syncdb
-
-{%- endif %}
+  {%- endif %}
 
 {%- if controller.version not in ["juno", "kilo", "liberty", "mitaka", "newton"] %}
-
 nova_controller_map_cell0:
   cmd.run:
   - name: nova-manage cell_v2 map_cell0

@@ -84,4 +84,28 @@ suites:
               version: <%=os_version%>
 <% end %>
 
+<% for os_version in ['ocata','pike','queens', 'rocky'] %>
+  - name: control_base_cluster
+    provisioner:
+      pillars-from-files:
+        nova.sls: tests/pillar/control_base_cluster.sls
+        linux_repo_openstack.sls: tests/pillar/repo_mcp_openstack_<%=os_version%>.sls
+      pillars:
+        release.sls:
+          nova:
+            api:
+              version: <%=os_version%>
+
+  - name: control_cell_cluster
+    provisioner:
+      pillars-from-files:
+        nova.sls: tests/pillar/control_cell_cluster.sls
+        linux_repo_openstack.sls: tests/pillar/repo_mcp_openstack_<%=os_version%>.sls
+      pillars:
+        release.sls:
+          nova:
+            conductor:
+              version: <%=os_version%>
+<% end %>
+
 # vim: ft=yaml sw=2 ts=2 sts=2 tw=125
