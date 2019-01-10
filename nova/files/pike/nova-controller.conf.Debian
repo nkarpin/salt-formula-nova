@@ -423,6 +423,9 @@ injected_network_template=$pybasedir/nova/virt/interfaces.template
 # Amount of time, in seconds, to wait for NBD device start up. (integer value)
 # Minimum value: 0
 #timeout_nbd=10
+{%- if controller.timeout_nbd is defined %}
+timeout_nbd = {{ controller.timeout_nbd }}
+{%- endif %}
 
 #
 # Location of cached images.
@@ -803,6 +806,10 @@ block_device_allocate_retries={{ controller.get('block_device_allocate_retries',
 # * Any value <=0 will disable the sync. This is not recommended.
 #  (integer value)
 #heal_instance_info_cache_interval=60
+{%- if controller.heal_instance_info_cache_interval is defined %}
+heal_instance_info_cache_interval = {{ controller.heal_instance_info_cache_interval }}
+{%- endif %}
+
 
 #
 # Interval for reclaiming deleted instances.
@@ -2898,12 +2905,21 @@ log_dir=/var/log/nova
 # Size of RPC connection pool. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_conn_pool_size
 #rpc_conn_pool_size=30
+{%- if controller.message_queue.rpc_conn_pool_size is defined %}
+rpc_conn_pool_size = {{ controller.message_queue.rpc_conn_pool_size }}
+{%- endif %}
 
 # The pool size limit for connections expiration policy (integer value)
 #conn_pool_min_size=2
+{%- if controller.message_queue.conn_pool_min_size is defined %}
+conn_pool_min_size = {{ controller.message_queue.conn_pool_min_size }}
+{%- endif %}
 
 # The time-to-live in sec of idle connections in the pool (integer value)
 #conn_pool_ttl=1200
+{%- if controller.message_queue.conn_pool_ttl is defined %}
+conn_pool_ttl = {{ controller.message_queue.conn_pool_ttl }}
+{%- endif %}
 
 # ZeroMQ bind address. Should be a wildcard (*), an ethernet interface, or IP.
 # The "host" option should point or resolve to this address. (string value)
@@ -2946,6 +2962,10 @@ zmq_linger=30
 # exception when timeout expired. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_poll_timeout
 #rpc_poll_timeout=1
+{%- if controller.message_queue.rpc_poll_timeout is defined %}
+rpc_poll_timeout = {{ controller.message_queue.rpc_poll_timeout }}
+{%- endif %}
+
 
 # Expiration timeout in seconds of a name service record about existing target (
 # < 0 means no timeout). (integer value)
@@ -3030,29 +3050,51 @@ zmq_linger=30
 
 # Maximum number of (green) threads to work concurrently. (integer value)
 #rpc_thread_pool_size=100
+{%- if controller.message_queue.rpc_thread_pool_size is defined %}
+rpc_thread_pool_size = {{ controller.message_queue.rpc_thread_pool_size }}
+{%- endif %}
 
 # Expiration timeout in seconds of a sent/received message after which it is not
 # tracked anymore by a client/server. (integer value)
 #rpc_message_ttl=300
+{%- if controller.message_queue.rpc_message_ttl is defined %}
+rpc_message_ttl = {{ controller.message_queue.rpc_message_ttl }}
+{%- endif %}
 
 # Wait for message acknowledgements from receivers. This mechanism works only
 # via proxy without PUB/SUB. (boolean value)
 #rpc_use_acks=false
+{%- if controller.message_queue.rpc_use_acks is defined %}
+rpc_use_acks = {{ controller.message_queue.rpc_use_acks }}
+{%- endif %}
+
 
 # Number of seconds to wait for an ack from a cast/call. After each retry
 # attempt this timeout is multiplied by some specified multiplier. (integer
 # value)
 #rpc_ack_timeout_base=15
+{%- if controller.message_queue.rpc_ack_timeout_base is defined %}
+rpc_ack_timeout_base = {{ controller.message_queue.rpc_ack_timeout_base }}
+{%- endif %}
+
 
 # Number to multiply base ack timeout by after each retry attempt. (integer
 # value)
 #rpc_ack_timeout_multiplier=2
+{%- if controller.message_queue.rpc_ack_timeout_multiplier is defined %}
+rpc_ack_timeout_multiplier = {{ controller.message_queue.rpc_ack_timeout_multiplier }}
+{%- endif %}
+
 
 # Default number of message sending attempts in case of any problems occurred:
 # positive value N means at most N retries, 0 means no retries, None or -1 (or
 # any other negative values) mean to retry forever. This option is used only if
 # acknowledgments are enabled. (integer value)
 #rpc_retry_attempts=3
+{%- if controller.message_queue.rpc_retry_attempts is defined %}
+rpc_retry_attempts = {{ controller.message_queue.rpc_retry_attempts }}
+{%- endif %}
+
 
 # List of publisher hosts SubConsumer can subscribe on. This option has higher
 # priority then the default publishers list taken from the matchmaker. (list
@@ -3062,6 +3104,10 @@ zmq_linger=30
 # Size of executor thread pool. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_thread_pool_size
 #executor_thread_pool_size=64
+{%- if controller.message_queue.executor_thread_pool_size is defined %}
+executor_thread_pool_size = {{ controller.message_queue.executor_thread_pool_size }}
+{%- endif %}
+
 
 # Seconds to wait for a response from a call. (integer value)
 #rpc_response_timeout=60
@@ -4272,7 +4318,7 @@ cross_az_attach={{ controller.cross_az_attach }}
 # number of CPUs available.
 #  (integer value)
 #workers=<None>
-workers = {{ controller.workers }}
+workers = {{ controller.get('conductor', {}).get('workers', controller.workers) }}
 
 [console]
 #
@@ -7544,45 +7590,73 @@ lock_path=/var/lib/nova/tmp
 # Seconds to pause before attempting to re-connect. (integer value)
 # Minimum value: 1
 #connection_retry_interval=1
+{%- if controller.message_queue.connection_retry_interval is defined %}
+connection_retry_interval = {{ controller.message_queue.connection_retry_interval }}
+{%- endif %}
+
 
 # Increase the connection_retry_interval by this many seconds after each
 # unsuccessful failover attempt. (integer value)
 # Minimum value: 0
 #connection_retry_backoff=2
+{%- if controller.message_queue.connection_retry_backoff is defined %}
+connection_retry_backoff = {{ controller.message_queue.connection_retry_backoff }}
+{%- endif %}
 
 # Maximum limit for connection_retry_interval + connection_retry_backoff
 # (integer value)
 # Minimum value: 1
 #connection_retry_interval_max=30
+{%- if controller.message_queue.connection_retry_interval_max is defined %}
+connection_retry_interval_max = {{ controller.message_queue.connection_retry_interval_max }}
+{%- endif %}
 
 # Time to pause between re-connecting an AMQP 1.0 link that failed due to a
 # recoverable error. (integer value)
 # Minimum value: 1
 #link_retry_delay=10
+{%- if controller.message_queue.link_retry_delay is defined %}
+link_retry_delay = {{ controller.message_queue.link_retry_delay }}
+{%- endif %}
 
 # The maximum number of attempts to re-send a reply message which failed due to
 # a recoverable error. (integer value)
 # Minimum value: -1
 #default_reply_retry=0
+{%- if controller.message_queue.default_reply_retry is defined %}
+default_reply_retry = {{ controller.message_queue.default_reply_retry }}
+{%- endif %}
 
 # The deadline for an rpc reply message delivery. (integer value)
 # Minimum value: 5
 #default_reply_timeout=30
+{%- if controller.message_queue.default_reply_timeout is defined %}
+default_reply_timeout = {{ controller.message_queue.default_reply_timeout }}
+{%- endif %}
 
 # The deadline for an rpc cast or call message delivery. Only used when caller
 # does not provide a timeout expiry. (integer value)
 # Minimum value: 5
 #default_send_timeout=30
+{%- if controller.message_queue.default_send_timeout is defined %}
+default_send_timeout = {{ controller.message_queue.default_send_timeout }}
+{%- endif %}
 
 # The deadline for a sent notification message delivery. Only used when caller
 # does not provide a timeout expiry. (integer value)
 # Minimum value: 5
 #default_notify_timeout=30
+{%- if controller.message_queue.default_notify_timeout is defined %}
+default_notify_timeout = {{ controller.message_queue.default_notify_timeout }}
+{%- endif %}
 
 # The duration to schedule a purge of idle sender links. Detach link after
 # expiry. (integer value)
 # Minimum value: 1
 #default_sender_link_timeout=600
+{%- if controller.message_queue.default_sender_link_timeout is defined %}
+default_sender_link_timeout = {{ controller.message_queue.default_sender_link_timeout }}
+{%- endif %}
 
 # Indicates the addressing mode used by the driver.
 # Permitted values:
@@ -7748,9 +7822,6 @@ driver=messagingv2
 #
 # From oslo.messaging
 #
-rabbit_retry_interval = 1
-rabbit_retry_backoff = 2
-rpc_conn_pool_size = 300
 # Use durable queues in AMQP. (boolean value)
 # Deprecated group/name - [DEFAULT]/amqp_durable_queues
 # Deprecated group/name - [DEFAULT]/rabbit_durable_queues
@@ -7854,15 +7925,27 @@ rpc_conn_pool_size = 300
 
 # How frequently to retry connecting with RabbitMQ. (integer value)
 #rabbit_retry_interval=1
+{%- if controller.message_queue.rabbit_retry_interval is defined %}
+rabbit_retry_interval = {{ controller.message_queue.rabbit_retry_interval }}
+{%- endif %}
+
 
 # How long to backoff for between retries when connecting to RabbitMQ. (integer
 # value)
 # Deprecated group/name - [DEFAULT]/rabbit_retry_backoff
 #rabbit_retry_backoff=2
+{%- if controller.message_queue.rabbit_retry_backoff is defined %}
+rabbit_retry_backoff = {{ controller.message_queue.rabbit_retry_backoff }}
+{%- endif %}
+
 
 # Maximum interval of RabbitMQ connection retries. Default is 30 seconds.
 # (integer value)
 #rabbit_interval_max=30
+{%- if controller.message_queue.rabbit_interval_max is defined %}
+rabbit_interval_max = {{ controller.message_queue.rabbit_interval_max }}
+{%- endif %}
+
 
 # DEPRECATED: Maximum number of RabbitMQ connection retries. Default is 0
 # (infinite retry count). (integer value)
@@ -7870,6 +7953,9 @@ rpc_conn_pool_size = 300
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #rabbit_max_retries=0
+{%- if controller.message_queue.rabbit_max_retries is defined %}
+rabbit_max_retries = {{ controller.message_queue.rabbit_max_retries }}
+{%- endif %}
 
 # Try to use HA queues in RabbitMQ (x-ha-policy: all). If you change this
 # option, you must wipe the RabbitMQ database. In RabbitMQ 3.0, queue mirroring
@@ -7885,32 +7971,56 @@ rpc_conn_pool_size = 300
 # The parameter affects only reply and fanout queues. (integer value)
 # Minimum value: 1
 #rabbit_transient_queues_ttl=1800
+{%- if controller.message_queue.rabbit_transient_queues_ttl is defined %}
+rabbit_transient_queues_ttl = {{ controller.message_queue.rabbit_transient_queues_ttl }}
+{%- endif %}
 
 # Specifies the number of messages to prefetch. Setting to zero allows unlimited
 # messages. (integer value)
 #rabbit_qos_prefetch_count=0
+{%- if controller.message_queue.rabbit_qos_prefetch_count is defined %}
+rabbit_qos_prefetch_count = {{ controller.message_queue.rabbit_qos_prefetch_count }}
+{%- endif %}
 
 # Number of seconds after which the Rabbit broker is considered down if
 # heartbeat's keep-alive fails (0 disable the heartbeat). EXPERIMENTAL (integer
 # value)
 #heartbeat_timeout_threshold=60
+{%- if controller.message_queue.heartbeat_timeout_threshold is defined %}
+heartbeat_timeout_threshold = {{ controller.message_queue.heartbeat_timeout_threshold }}
+{%- endif %}
 
 # How often times during the heartbeat_timeout_threshold we check the heartbeat.
 # (integer value)
 #heartbeat_rate=2
+{%- if controller.message_queue.heartbeat_rate is defined %}
+heartbeat_rate = {{ controller.message_queue.heartbeat_rate }}
+{%- endif %}
 
 # Deprecated, use rpc_backend=kombu+memory or rpc_backend=fake (boolean value)
 # Deprecated group/name - [DEFAULT]/fake_rabbit
 #fake_rabbit=false
+{%- if controller.message_queue.fake_rabbit is defined %}
+fake_rabbit = {{ controller.message_queue.fake_rabbit }}
+{%- endif %}
 
 # Maximum number of channels to allow (integer value)
 #channel_max=<None>
+{%- if controller.message_queue.channel_max is defined %}
+channel_max = {{ controller.message_queue.channel_max }}
+{%- endif %}
 
 # The maximum byte size for an AMQP frame (integer value)
 #frame_max=<None>
+{%- if controller.message_queue.frame_max is defined %}
+frame_max = {{ controller.message_queue.frame_max }}
+{%- endif %}
 
 # How often to send heartbeats for consumer's connections (integer value)
 #heartbeat_interval=3
+{%- if controller.message_queue.heartbeat_interval is defined %}
+heartbeat_interval = {{ controller.message_queue.heartbeat_interval }}
+{%- endif %}
 
 # Enable SSL (boolean value)
 #ssl=<None>
@@ -7920,13 +8030,22 @@ rpc_conn_pool_size = 300
 
 # Set socket timeout in seconds for connection's socket (floating point value)
 #socket_timeout=0.25
+{%- if controller.message_queue.socket_timeout is defined %}
+socket_timeout = {{ controller.message_queue.socket_timeout }}
+{%- endif %}
 
 # Set TCP_USER_TIMEOUT in seconds for connection's socket (floating point value)
 #tcp_user_timeout=0.25
+{%- if controller.message_queue.tcp_user_timeout is defined %}
+tcp_user_timeout = {{ controller.message_queue.tcp_user_timeout }}
+{%- endif %}
 
 # Set delay for reconnection to some host which has connection error (floating
 # point value)
 #host_connection_reconnect_delay=0.25
+{%- if controller.message_queue.host_connection_reconnect_delay is defined %}
+host_connection_reconnect_delay = {{ controller.message_queue.host_connection_reconnect_delay }}
+{%- endif %}
 
 # Connection factory implementation (string value)
 # Allowed values: new, single, read_write
@@ -7934,79 +8053,139 @@ rpc_conn_pool_size = 300
 
 # Maximum number of connections to keep queued. (integer value)
 #pool_max_size=30
+{%- if controller.message_queue.pool_max_size is defined %}
+pool_max_size = {{ controller.message_queue.pool_max_size }}
+{%- endif %}
 
 # Maximum number of connections to create above `pool_max_size`. (integer value)
 #pool_max_overflow=0
+{%- if controller.message_queue.pool_max_overflow is defined %}
+pool_max_overflow = {{ controller.message_queue.pool_max_overflow }}
+{%- endif %}
 
 # Default number of seconds to wait for a connections to available (integer
 # value)
 #pool_timeout=30
+{%- if controller.message_queue.pool_timeout is defined %}
+pool_timeout = {{ controller.message_queue.pool_timeout }}
+{%- endif %}
 
 # Lifetime of a connection (since creation) in seconds or None for no recycling.
 # Expired connections are closed on acquire. (integer value)
 #pool_recycle=600
+{%- if controller.message_queue.pool_recycle is defined %}
+pool_recycle = {{ controller.message_queue.pool_recycle }}
+{%- endif %}
 
 # Threshold at which inactive (since release) connections are considered stale
 # in seconds or None for no staleness. Stale connections are closed on acquire.
 # (integer value)
 #pool_stale=60
+{%- if controller.message_queue.pool_stale is defined %}
+pool_stale = {{ controller.message_queue.pool_stale }}
+{%- endif %}
 
 # Default serialization mechanism for serializing/deserializing
 # outgoing/incoming messages (string value)
 # Allowed values: json, msgpack
 #default_serializer_type=json
+{%- if controller.message_queue.default_serializer_type is defined %}
+default_serializer_type = {{ controller.message_queue.default_serializer_type }}
+{%- endif %}
 
 # Persist notification messages. (boolean value)
 #notification_persistence=false
+{%- if controller.message_queue.notification_persistence is defined %}
+notification_persistence = {{ controller.message_queue.notification_persistence }}
+{%- endif %}
 
 # Exchange name for sending notifications (string value)
 #default_notification_exchange=${control_exchange}_notification
+{%- if controller.message_queue.default_notification_exchange is defined %}
+default_notification_exchange = {{ controller.message_queue.default_notification_exchange }}
+{%- endif %}
 
 # Max number of not acknowledged message which RabbitMQ can send to notification
 # listener. (integer value)
 #notification_listener_prefetch_count=100
+{%- if controller.message_queue.notification_listener_prefetch_count is defined %}
+notification_listener_prefetch_count = {{ controller.message_queue.notification_listener_prefetch_count }}
+{%- endif %}
 
 # Reconnecting retry count in case of connectivity problem during sending
 # notification, -1 means infinite retry. (integer value)
 #default_notification_retry_attempts=-1
+{%- if controller.message_queue.default_notification_retry_attempts is defined %}
+default_notification_retry_attempts = {{ controller.message_queue.default_notification_retry_attempts }}
+{%- endif %}
 
 # Reconnecting retry delay in case of connectivity problem during sending
 # notification message (floating point value)
 #notification_retry_delay=0.25
+{%- if controller.message_queue.notification_retry_delay is defined %}
+notification_retry_delay = {{ controller.message_queue.notification_retry_delay }}
+{%- endif %}
 
 # Time to live for rpc queues without consumers in seconds. (integer value)
 #rpc_queue_expiration=60
+{%- if controller.message_queue.rpc_queue_expiration is defined %}
+rpc_queue_expiration = {{ controller.message_queue.rpc_queue_expiration }}
+{%- endif %}
 
 # Exchange name for sending RPC messages (string value)
 #default_rpc_exchange=${control_exchange}_rpc
+{%- if controller.message_queue.default_rpc_exchange is defined %}
+default_rpc_exchange = {{ controller.message_queue.default_rpc_exchange }}
+{%- endif %}
 
 # Exchange name for receiving RPC replies (string value)
 #rpc_reply_exchange=${control_exchange}_rpc_reply
+{%- if controller.message_queue.rpc_reply_exchange is defined %}
+rpc_reply_exchange = {{ controller.message_queue.rpc_reply_exchange }}
+{%- endif %}
 
 # Max number of not acknowledged message which RabbitMQ can send to rpc
 # listener. (integer value)
 #rpc_listener_prefetch_count=100
+{%- if controller.message_queue.rpc_listener_prefetch_count is defined %}
+rpc_listener_prefetch_count = {{ controller.message_queue.rpc_listener_prefetch_count }}
+{%- endif %}
 
 # Max number of not acknowledged message which RabbitMQ can send to rpc reply
 # listener. (integer value)
 #rpc_reply_listener_prefetch_count=100
+{%- if controller.message_queue.rpc_reply_listener_prefetch_count is defined %}
+rpc_reply_listener_prefetch_count = {{ controller.message_queue.rpc_reply_listener_prefetch_count }}
+{%- endif %}
 
 # Reconnecting retry count in case of connectivity problem during sending reply.
 # -1 means infinite retry during rpc_timeout (integer value)
 #rpc_reply_retry_attempts=-1
+{%- if controller.message_queue.rpc_reply_retry_attempts is defined %}
+rpc_reply_retry_attempts = {{ controller.message_queue.rpc_reply_retry_attempts }}
+{%- endif %}
 
 # Reconnecting retry delay in case of connectivity problem during sending reply.
 # (floating point value)
 #rpc_reply_retry_delay=0.25
+{%- if controller.message_queue.rpc_reply_retry_delay is defined %}
+rpc_reply_retry_delay = {{ controller.message_queue.rpc_reply_retry_delay }}
+{%- endif %}
 
 # Reconnecting retry count in case of connectivity problem during sending RPC
 # message, -1 means infinite retry. If actual retry attempts in not 0 the rpc
 # request could be processed more than one time (integer value)
 #default_rpc_retry_attempts=-1
+{%- if controller.message_queue.default_rpc_retry_attempts is defined %}
+default_rpc_retry_attempts = {{ controller.message_queue.default_rpc_retry_attempts }}
+{%- endif %}
 
 # Reconnecting retry delay in case of connectivity problem during sending RPC
 # message (floating point value)
 #rpc_retry_delay=0.25
+{%- if controller.message_queue.rpc_retry_delay is defined %}
+rpc_retry_delay = {{ controller.message_queue.rpc_retry_delay }}
+{%- endif %}
 
 {# rabbitmq ssl configuration #}
 {%- if controller.message_queue.get('ssl',{}).get('enabled', False) %}
@@ -8077,6 +8256,10 @@ kombu_ssl_ca_certs = {{ controller.message_queue.ssl.get('cacert_file', controll
 # exception when timeout expired. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_poll_timeout
 #rpc_poll_timeout=1
+{%- if controller.message_queue.rpc_poll_timeout is defined %}
+rpc_poll_timeout = {{ controller.message_queue.rpc_poll_timeout }}
+{%- endif %}
+
 
 # Expiration timeout in seconds of a name service record about existing target (
 # < 0 means no timeout). (integer value)
