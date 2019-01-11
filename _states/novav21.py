@@ -11,11 +11,13 @@
 #    under the License.
 
 import logging
-import six
-from six.moves import zip_longest
 import time
+
 import salt
 from salt.exceptions import CommandExecutionError
+import six
+from six.moves import urllib
+from six.moves import zip_longest
 
 LOG = logging.getLogger(__name__)
 
@@ -282,83 +284,196 @@ def keypair_absent(name, cloud_name):
     return _non_existent(name, 'Keypair')
 
 
-def cell_present(name='cell1', transport_url='none:///', db_engine='mysql',
-                 db_name='nova_upgrade', db_user='nova', db_password=None,
-                 db_address='0.0.0.0'):
+def _urlencode(dictionary):
+    return '&'.join([
+        '='.join((urllib.parse.quote(key), urllib.parse.quote(str(value))))
+        for key, value in dictionary.items()])
+
+
+def _cmd_raising_helper(command_string, test=False, runas='nova'):
+    if test:
+        LOG.info('This is a test run of the following command: "%s"' %
+                 command_string)
+        return ''
+    result = __salt__['cmd.run_all'](command_string, python_shell=True,
+                                     runas=runas)
+    if result.get('retcode', 0) != 0:
+        raise CommandExecutionError(
+            "Command '%(cmd)s' returned error code %(code)s." %
+            {'cmd': command_string, 'code': result.get('retcode')})
+    return result['stdout']
+
+
+def cell_present(name, db_name, db_user, db_password, db_address,
+                 messaging_hosts, messaging_user, messaging_password,
+                 messaging_virtual_host, db_engine='mysql',
+                 messaging_engine='rabbit', messaging_query_params=None,
+                 db_query_params=None, runas='nova', test=False):
     """Ensure nova cell is present
 
     For newly created cells this state also runs discover_hosts and
-    map_instances."""
+    map_instances.
+
+    :param name: name of the cell to be present.
+    :param db_engine: cell database engine.
+    :param db_name: name of the cell database.
+    :param db_user: username for the cell database.
+    :param db_password: password for the cell database.
+    :param db_address: cell database host.
+    :param messaging_engine: cell messaging engine.
+    :param messaging_hosts: a list of dictionaries of messaging hosts of the
+        cell, containing host and optional port keys. port key defaults
+        to 5672.
+    :param messaging_user: username for cell messaging hosts.
+    :param messaging_password: password for cell messaging hosts.
+    :param messaging_virtual_host: cell messaging vhost.
+    :param messaging_query_params: dictionary of query params to append to
+        transport URL.
+    :param db_query_params: dictionary of query params to append to database
+        connection URL. charset=utf8 will always be present in query params.
+    :param runas: username to run the shell commands under.
+    :param test: if this is a test run, actual commands changing state won't
+        be run. False by default.
+    """
     cell_info = __salt__['cmd.shell'](
-        "nova-manage cell_v2 list_cells --verbose | "
-        "awk '/%s/ {print $4,$6,$8}'" % name).split()
+        "nova-manage cell_v2 list_cells --verbose 2>/dev/null | "
+        "awk '/%s/ {print $4,$6,$8}'" % name, runas=runas).split()
+    transport_url = '%s://' % messaging_engine
+    for h in messaging_hosts:
+        if 'host' not in h:
+            ret = _create_failed(name, 'Nova cell')
+            ret['comment'] = (
+                'messaging_hosts parameter of cell_present call should be '
+                'a list of dicts containing host and optionally port keys')
+            return ret
+        transport_url = (
+            '%(transport_url)s%(user)s:%(password)s@%(host)s:%(port)s,' %
+            {'transport_url': transport_url, 'user': messaging_user,
+             'password': messaging_password, 'host': h['host'],
+             'port': h.get('port', 5672)})
+    transport_url = '%(transport_url)s/%(messaging_virtual_host)s' % {
+        'transport_url': transport_url.rstrip(','),
+        'messaging_virtual_host': messaging_virtual_host}
+    if messaging_query_params:
+        transport_url = '%(transport_url)s?%(query)s' % {
+            'transport_url': transport_url,
+            'query': _urlencode(messaging_query_params)}
     db_connection = (
         '%(db_engine)s+pymysql://%(db_user)s:%(db_password)s@'
-        '%(db_address)s/%(db_name)s?charset=utf8' % {
+        '%(db_address)s/%(db_name)s' % {
             'db_engine': db_engine, 'db_user': db_user,
             'db_password': db_password, 'db_address': db_address,
             'db_name': db_name})
-    args = {'transport_url': transport_url, 'db_connection': db_connection}
+    if not db_query_params:
+        db_query_params = {}
+    db_query_params['charset'] = 'utf8'
+    db_connection = '%(db_connection)s?%(query)s' % {
+        'db_connection': db_connection,
+        'query': _urlencode(db_query_params)}
+    changes = {}
     # There should be at least 1 component printed to cell_info
     if len(cell_info) >= 1:
         cell_info = dict(zip_longest(
             ('cell_uuid', 'existing_transport_url', 'existing_db_connection'),
             cell_info))
-        cell_uuid, existing_transport_url, existing_db_connection = cell_info
-        command_string = ''
-        if existing_transport_url != transport_url:
-            command_string = (
-                '%s --transport-url %%(transport_url)s' % command_string)
-        if existing_db_connection != db_connection:
-            command_string = (
-                '%s --database_connection %%(db_connection)s' % command_string)
-        if not command_string:
+        command_string = ('--transport-url \'%(transport_url)s\' '
+                          '--database_connection \'%(db_connection)s\'')
+        if cell_info['existing_transport_url'] != transport_url:
+            changes['transport_url'] = transport_url
+        if cell_info['existing_db_connection'] != db_connection:
+            changes['db_connection'] = db_connection
+        if not changes:
             return _no_change(name, 'Nova cell')
         try:
-            __salt__['cmd.shell'](
+            _cmd_raising_helper(
                 ('nova-manage cell_v2 update_cell --cell_uuid %s %s' % (
-                    cell_uuid, command_string)) % args)
+                    cell_info['cell_uuid'], command_string)) % {
+                    'transport_url': transport_url,
+                    'db_connection': db_connection}, test=test, runas=runas)
             LOG.warning("Updating the transport_url or database_connection "
                         "fields on a running system will NOT result in all "
                         "nodes immediately using the new values. Use caution "
-                        "when changing these values.")
-            ret = _updated(name, 'Nova cell', args)
+                        "when changing these values. You need to restart all "
+                        "nova services on all controllers after this action.")
+            ret = _updated(name, 'Nova cell', changes)
         except Exception as e:
             ret = _update_failed(name, 'Nova cell')
             ret['comment'] += '\nException: %s' % e
         return ret
-    args.update(name=name)
+    changes = {'transport_url': transport_url, 'db_connection': db_connection,
+               'name': name}
     try:
-        cell_uuid = __salt__['cmd.shell'](
+        _cmd_raising_helper(
             'nova-manage cell_v2 create_cell --name %(name)s '
-            '--transport-url %(transport_url)s '
-            '--database_connection %(db_connection)s --verbose' % args)
-        __salt__['cmd.shell']('nova-manage cell_v2 discover_hosts '
-                              '--cell_uuid %s --verbose' % cell_uuid)
-        __salt__['cmd.shell']('nova-manage cell_v2 map_instances '
-                              '--cell_uuid %s' % cell_uuid)
-        ret = _created(name, 'Nova cell', args)
+            '--transport-url \'%(transport_url)s\' '
+            '--database_connection \'%(db_connection)s\' --verbose '
+            '2>/dev/null' % changes, test=test, runas=runas)
+        ret = _created(name, 'Nova cell', changes)
     except Exception as e:
         ret = _create_failed(name, 'Nova cell')
         ret['comment'] += '\nException: %s' % e
     return ret
 
 
-def cell_absent(name, force=False):
-    """Ensure cell is absent"""
+def cell_absent(name, force=False, runas='nova', test=False):
+    """Ensure cell is absent
+
+    :param name: name of the cell to delete.
+    :param force: force cell deletion even if it contains host mappings
+        (host entries will be removed as well).
+    :param runas: username to run the shell commands under.
+    :param test: if this is a test run, actual commands changing state won't
+        be run. False by default.
+    """
     cell_uuid = __salt__['cmd.shell'](
-        "nova-manage cell_v2 list_cells | awk '/%s/ {print $4}'" % name)
+        "nova-manage cell_v2 list_cells 2>/dev/null | awk '/%s/ {print $4}'" %
+        name, runas=runas)
     if not cell_uuid:
         return _non_existent(name, 'Nova cell')
     try:
-        __salt__['cmd.shell'](
+        # Note that if the cell contains any hosts, you need to pass force
+        # parameter for the deletion to succeed. Cell that has any instance
+        # mappings can not be deleted even with force.
+        _cmd_raising_helper(
             'nova-manage cell_v2 delete_cell --cell_uuid %s %s' % (
-                cell_uuid, '--force' if force else ''))
+                cell_uuid, '--force' if force else ''), test=test, runas=runas)
         ret = _deleted(name, 'Nova cell')
     except Exception as e:
         ret = _delete_failed(name, 'Nova cell')
         ret['comment'] += '\nException: %s' % e
     return ret
+
+
+def instances_mapped_to_cell(name, timeout=60, runas='nova'):
+    """Ensure that all instances in the cell are mapped
+
+    :param name: cell name.
+    :param timeout: amount of time in seconds mapping process should finish in.
+    :param runas: username to run the shell commands under.
+    """
+    cell_uuid = __salt__['cmd.shell'](
+        "nova-manage cell_v2 list_cells 2>/dev/null | "
+        "awk '/%s/ {print $4}'" % name, runas=runas)
+    result = {'name': name, 'changes': {}, 'result': False}
+    if not cell_uuid:
+        result['comment'] = (
+            'Failed to map all instances in cell {0}, it does not exist'
+            .format(name))
+        return result
+    start_time = time.time()
+    while True:
+        rc = __salt__['cmd.retcode']('nova-manage cell_v2 map_instances '
+                                     '--cell_uuid %s' % cell_uuid, runas=runas)
+        if rc == 0 or time.time() - start_time > timeout:
+            break
+    if rc != 0:
+        result['comment'] = (
+            'Failed to map all instances in cell {0} in {1} seconds'
+            .format(name, timeout))
+        return result
+    result['comment'] = 'All instances mapped in cell {0}'.format(name)
+    result['result'] = True
+    return result
 
 
 def _db_version_update(db, version, human_readable_resource_name):
