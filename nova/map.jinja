@@ -401,6 +401,7 @@ RedHat:
 
 {%- endif %}
 
+{% set cells = pillar.get('nova', {}).get('cells', {'cell1':{}}) %}
 
 {% set scheduler = salt['grains.filter_by']({
     'Debian': {
