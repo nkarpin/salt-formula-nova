@@ -3231,6 +3231,7 @@ osapi_compute_listen = {{ controller.bind.private_address }}
 #  (integer value)
 # Minimum value: 1
 #osapi_compute_workers = <None>
+osapi_compute_workers = {{ controller.workers }}
 
 #
 # IP address on which the metadata API will listen.
@@ -4486,7 +4487,8 @@ cross_az_attach={{ controller.cross_az_attach }}
 # be the
 # number of CPUs available.
 #  (integer value)
-workers = {{ controller.workers }}
+
+workers = {{ controller.get('conductor', {}).get('workers', controller.workers) }}
 
 
 [console]

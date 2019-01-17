@@ -316,7 +316,7 @@ default_schedule_zone = {{ controller.default_schedule_zone }}
 # * False: Instances should continue booting after VIF plugging timeout
 #  (boolean value)
 #vif_plugging_is_fatal=true
-vif_plugging_is_fatal=false
+vif_plugging_is_fatal = {{ controller.get('vif_plugging_is_fatal', 'false') }}
 
 #
 # Timeout for Neutron VIF plugging event message arrival.
@@ -332,7 +332,7 @@ vif_plugging_is_fatal=false
 #  (integer value)
 # Minimum value: 0
 #vif_plugging_timeout=300
-vif_plugging_timeout=0
+vif_plugging_timeout = {{ controller.get('vif_plugging_timeout', '300') }}
 
 # Path to '/etc/network/interfaces' template.
 #

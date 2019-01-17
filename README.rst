@@ -30,6 +30,8 @@ Nova services on the controller node:
         workers: 8
         report_interval: 60
         dhcp_domain: novalocal
+        vif_plugging_timeout: 300
+        vif_plugging_is_fatal: false
         consoleauth:
           token_ttl: 600
         bind:
@@ -282,6 +284,8 @@ Nova controller services on compute node:
         resume_guests_state_on_host_boot: False
         preallocate_images: space  # Default is 'none'
         my_ip: 10.1.0.16
+        vif_plugging_timeout: 300
+        vif_plugging_is_fatal: false
         bind:
           vnc_address: 172.20.0.100
           vnc_port: 6080

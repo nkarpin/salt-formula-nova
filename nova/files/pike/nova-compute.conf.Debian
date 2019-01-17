@@ -312,7 +312,7 @@ allow_resize_to_same_host=true
 # * False: Instances should continue booting after VIF plugging timeout
 #  (boolean value)
 #vif_plugging_is_fatal=true
-vif_plugging_is_fatal=true
+vif_plugging_is_fatal = {{ compute.get('vif_plugging_is_fatal', 'true') }}
 
 #
 # Timeout for Neutron VIF plugging event message arrival.
@@ -328,7 +328,7 @@ vif_plugging_is_fatal=true
 #  (integer value)
 # Minimum value: 0
 #vif_plugging_timeout=300
-vif_plugging_timeout=300
+vif_plugging_timeout = {{ compute.get('vif_plugging_timeout', '300') }}
 
 # Path to '/etc/network/interfaces' template.
 #
