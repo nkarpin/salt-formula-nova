@@ -387,6 +387,8 @@ RedHat:
     },
 }, merge=pillar.nova.get('common', {}), base='BaseDefaults') %}
 
+{% set cells = pillar.get('nova', {}).get('cells', {}) %}
+
 {%- if controller.get('enabled', False) %}
 
 {% set cfg = salt['grains.filter_by']({
