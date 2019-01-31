@@ -1182,6 +1182,27 @@ nova:
 You can read more about it here:
     https://docs.openstack.org/security-guide/databases/database-access-control.html
 
+Nova database connection setup:
+========
+
+.. code-block:: yaml
+
+   nova:
+     controller:
+     enabled: True
+     ...
+     database:
+       idle_timeout: 180
+       min_pool_size: 100
+       max_pool_size: 700
+       max_overflow: 100
+       retry_interval: 5
+       max_retries: '-1'
+       db_max_retries: 3
+       db_retry_interval: 1
+       connection_debug: 10
+       pool_timeout: 120
+
 Upgrades
 ========
 

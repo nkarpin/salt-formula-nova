@@ -24,6 +24,16 @@ nova:
       name: nova
       user: nova
       password: password
+      idle_timeout: 180
+      min_pool_size: 100
+      max_pool_size: 700
+      max_overflow: 100
+      retry_interval: 5
+      max_retries: '-1'
+      db_max_retries: 3
+      db_retry_interval: 1
+      connection_debug: 10
+      pool_timeout: 120
     identity:
       engine: keystone
       region: RegionOne

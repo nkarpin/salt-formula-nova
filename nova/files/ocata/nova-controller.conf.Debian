@@ -3436,16 +3436,16 @@ fping_path=/usr/sbin/fping
 #
 # From nova.conf
 #
-idle_timeout = 180
-min_pool_size = 100
-max_pool_size = 700
-max_overflow = 100
-retry_interval = 5
-max_retries = -1
-db_max_retries = 3
-db_retry_interval = 1
-connection_debug = 10
-pool_timeout = 120
+idle_timeout = {{ controller.database.get('idle_timeout', 180) }}
+min_pool_size = {{ controller.database.get('min_pool_size', 100) }}
+max_pool_size = {{ controller.database.get('max_pool_size', 700) }}
+max_overflow = {{ controller.database.get('max_overflow', 100) }}
+retry_interval = {{ controller.database.get('retry_interval', 5) }}
+max_retries = {{ controller.database.get('max_retries', '-1') }}
+db_max_retries = {{ controller.database.get('db_max_retries', 3) }}
+db_retry_interval = {{ controller.database.get('db_retry_interval', 1) }}
+connection_debug = {{ controller.database.get('connection_debug', 10) }}
+pool_timeout = {{ controller.database.get('pool_timeout', 120) }}
 connection = {{ controller.database.engine }}+pymysql://{{ controller.database.user }}:{{ controller.database.password }}@{{ controller.database.host }}/{{ controller.database.name }}_api?charset=utf8{%- if controller.database.get('ssl',{}).get('enabled',False) %}&ssl_ca={{ controller.database.ssl.get('cacert_file', controller.cacert_file) }}{% endif %}
 
 # The SQLAlchemy connection string to use to connect to the database. (string
@@ -4491,16 +4491,16 @@ allow_headers = {{ controller.cors.allow_headers }}
 # Reason: Should use config option connection or slave_connection to connect the
 # database.
 #sqlite_db=oslo.sqlite
-idle_timeout = 180
-min_pool_size = 100
-max_pool_size = 700
-max_overflow = 100
-retry_interval = 5
-max_retries = -1
-db_max_retries = 3
-db_retry_interval = 1
-connection_debug = 10
-pool_timeout = 120
+idle_timeout = {{ controller.database.get('idle_timeout', 180) }}
+min_pool_size = {{ controller.database.get('min_pool_size', 100) }}
+max_pool_size = {{ controller.database.get('max_pool_size', 700) }}
+max_overflow = {{ controller.database.get('max_overflow', 100) }}
+retry_interval = {{ controller.database.get('retry_interval', 5) }}
+max_retries = {{ controller.database.get('max_retries', '-1') }}
+db_max_retries = {{ controller.database.get('db_max_retries', 3) }}
+db_retry_interval = {{ controller.database.get('db_retry_interval', 1) }}
+connection_debug = {{ controller.database.get('connection_debug', 10) }}
+pool_timeout = {{ controller.database.get('pool_timeout', 120) }}
 connection = {{ controller.database.engine }}+pymysql://{{ controller.database.user }}:{{ controller.database.password }}@{{ controller.database.host }}/{{ controller.database.name }}?charset=utf8{%- if controller.database.get('ssl',{}).get('enabled',False) %}&ssl_ca={{ controller.database.ssl.get('cacert_file', controller.cacert_file) }}{% endif %}
 
 # If True, SQLite uses synchronous mode. (boolean value)
