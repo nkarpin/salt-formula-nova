@@ -428,8 +428,9 @@ nova_controller_discover_hosts:
     - sls: nova.db.offline_sync
 
 nova_controller_map_instances:
-  novang.map_instances:
+  novav21.instances_mapped_to_cell:
   - name: 'cell1'
+  - timeout: {{ controller.get('mapped_instances_interval', 60) }}
   {%- if grains.get('noservices') %}
   - onlyif: /bin/false
   {%- endif %}

@@ -61,7 +61,7 @@ platforms:
 
 suites:
 <% for os_version in ['mitaka','newton','ocata','pike', 'queens', 'rocky'] %>
-  - name: compute_cluster
+  - name: compute_cluster_<%=os_version%>
     provisioner:
       pillars-from-files:
         nova.sls: tests/pillar/compute_cluster.sls
@@ -72,7 +72,7 @@ suites:
             compute:
               version: <%=os_version%>
 
-  - name: control_cluster
+  - name: control_cluster_<%=os_version%>
     provisioner:
       pillars-from-files:
         nova.sls: tests/pillar/control_cluster.sls
