@@ -14,7 +14,10 @@ import six
 import logging
 import uuid
 
-import os_client_config
+try:
+    import os_client_config
+except ImportError:
+    os_client_config = None
 from salt import exceptions
 
 
@@ -24,6 +27,10 @@ SERVICE_KEY = 'compute'
 
 
 def get_raw_client(cloud_name):
+    if not os_client_config:
+        raise exceptions.SaltInvocationError(
+            "Cannot load os-client-config. Please check your environment "
+            "configuration.")
     config = os_client_config.OpenStackConfig()
     cloud = config.get_one_cloud(cloud_name)
     adapter = cloud.get_session_client(SERVICE_KEY)
