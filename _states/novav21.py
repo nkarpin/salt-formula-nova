@@ -466,6 +466,7 @@ def instances_mapped_to_cell(name, timeout=60, runas='nova'):
     :param timeout: amount of time in seconds mapping process should finish in.
     :param runas: username to run the shell commands under.
     """
+    test = __opts__.get('test', False)
     cell_uuid = __salt__['cmd.shell'](
         "nova-manage cell_v2 list_cells 2>/dev/null | "
         "awk '/%s/ {print $4}'" % name, runas=runas)
@@ -476,17 +477,21 @@ def instances_mapped_to_cell(name, timeout=60, runas='nova'):
             .format(name))
         return result
     start_time = time.time()
-    while True:
-        rc = __salt__['cmd.retcode']('nova-manage cell_v2 map_instances '
-                                     '--cell_uuid %s' % cell_uuid, runas=runas)
-        if rc == 0 or time.time() - start_time > timeout:
-            break
-    if rc != 0:
-        result['comment'] = (
-            'Failed to map all instances in cell {0} in {1} seconds'
-            .format(name, timeout))
-        return result
+    if not test:
+        while True:
+            rc = __salt__['cmd.retcode'](
+                'nova-manage cell_v2 map_instances --cell_uuid %s' % cell_uuid,
+                runas=runas)
+            if rc == 0 or time.time() - start_time > timeout:
+                break
+        if rc != 0:
+            result['comment'] = (
+                'Failed to map all instances in cell {0} in {1} seconds'
+                .format(name, timeout))
+            return result
     result['comment'] = 'All instances mapped in cell {0}'.format(name)
+    if test:
+        result['comment'] = 'TEST: {}'.format(result['comment'])
     result['result'] = True
     return result
 
