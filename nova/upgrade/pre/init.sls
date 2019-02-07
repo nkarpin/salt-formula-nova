@@ -16,7 +16,7 @@ nova_pre:
 /etc/nova/nova.conf:
   file.managed:
   - name: /etc/nova/nova.conf
-  - source: salt://nova/files/{{ _data.version }}/nova-{{ type }}.conf.{{ grains.os_family }}
+  - source: salt://nova/files/{{ upgrade.old_release }}/nova-{{ type }}.conf.{{ grains.os_family }}
   - template: jinja
 
 {%- if controller.get('enabled') %}
