@@ -274,6 +274,8 @@ Nova controller services on compute node:
       compute:
         version: juno
         enabled: true
+        timeout_nbd: 10
+        heal_instance_info_cache_interval: 60
         cross_az_attach: false
         disk_cachemodes: network=writeback,block=none
         availability_zone: availability_zone_01

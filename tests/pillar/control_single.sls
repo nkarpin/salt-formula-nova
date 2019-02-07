@@ -3,6 +3,8 @@ nova:
     enabled: true
     networking: contrail
     version: queens
+    timeout_nbd: 10
+    heal_instance_info_cache_interval: 60
     security_group: false
     vncproxy_url: 127.0.0.1
     vnc_keymap: en-gb

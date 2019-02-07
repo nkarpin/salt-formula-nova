@@ -313,6 +313,9 @@ vif_plugging_timeout = {{ controller.get('vif_plugging_timeout', '300') }}
 # Amount of time, in seconds, to wait for NBD device start up. (integer value)
 # Minimum value: 0
 #timeout_nbd = 10
+{%- if controller.timeout_nbd is defined %}
+timeout_nbd = {{ controller.timeout_nbd }}
+{%- endif %}
 
 #
 # Location of cached images.
@@ -736,6 +739,9 @@ block_device_allocate_retries = {{ controller.get('block_device_allocate_retries
 # * Any value <=0 will disable the sync. This is not recommended.
 #  (integer value)
 #heal_instance_info_cache_interval = 60
+{%- if controller.heal_instance_info_cache_interval is defined %}
+heal_instance_info_cache_interval = {{ controller.heal_instance_info_cache_interval }}
+{%- endif %}
 
 #
 # Interval for reclaiming deleted instances.
