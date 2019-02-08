@@ -430,6 +430,9 @@ force_raw_images={{ compute.get('image', {}).get('force_raw', True)|lower }}
 # (integer value)
 # Minimum value: 0
 #timeout_nbd = 10
+{%- if compute.timeout_nbd is defined %}
+timeout_nbd = {{ compute.timeout_nbd }}
+{%- endif %}
 
 #
 # Location of cached images.
