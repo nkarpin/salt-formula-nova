@@ -2679,6 +2679,7 @@ key = {{ controller.novncproxy.tls.server.key_file|yaml_squote }}
 # * The full path to a directory. Defaults to value provided in ``pybasedir``.
 #  (string value)
 #state_path = $pybasedir
+state_path = /var/lib/nova
 
 #
 # This option allows setting an alternate timeout value for RPC calls
