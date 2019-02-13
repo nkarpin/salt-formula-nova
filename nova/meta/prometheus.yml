@@ -1,4 +1,4 @@
-{% from "nova/map.jinja" import controller, compute, monitoring with context %}
+{% from "nova/map.jinja" import controller, compute with context %}
 
 {%- set is_controller = controller.get('enabled', False) %}
 {%- set is_compute = compute.get('enabled', False) %}
@@ -30,11 +30,6 @@ exporters:
 server:
   alert:
 {%- if is_controller %}
-{%- set minor_threshold = monitoring.services_failed_warning_threshold_percent|float %}
-{%- set major_threshold = monitoring.services_failed_critical_threshold_percent|float %}
-{%- set minor_compute_threshold = monitoring.computes_failed_warning_threshold_percent|float %}
-{%- set major_compute_threshold = monitoring.computes_failed_critical_threshold_percent|float %}
-{%- set major_endpoint_threshold = monitoring.endpoint_failed_major_threshold|float %}
 {% raw %}
     NovaApiOutage:
       if: >-
@@ -67,18 +62,17 @@ server:
         summary: "nova-api endpoint is not accessible"
         description: >-
           The nova-api endpoint on the {{ $labels.host }} node is not accessible for 2 minutes.
-{%- endraw %}
     NovaApiEndpointsDownMajor:
       if: >-
-        count(http_response_status{name=~"nova-api"} == 0) >= count(http_response_status{name=~"nova-api"}) * {{ major_endpoint_threshold }}
+        count(http_response_status{name=~"nova-api"} == 0) >= count(http_response_status{name=~"nova-api"}) * 0.6
       for: 2m
       labels:
         severity: major
         service: nova
       annotations:
-        summary: "{{major_endpoint_threshold * 100}}% of nova-api endpoints are not accessible"
+        summary: "60% of nova-api endpoints are not accessible"
         description: >-
-          {% raw %}{{ $value }} nova-api endpoints (>= {% endraw %} {{major_endpoint_threshold * 100}}{% raw %}%) are not accessible for 2 minutes.
+          More than 60% of nova-api endpoints are not accessible for 2 minutes.
     NovaApiEndpointsOutage:
       if: >-
         count(http_response_status{name=~"nova-api"} == 0) == count(http_response_status{name=~"nova-api"})
@@ -100,47 +94,46 @@ server:
         summary: "{{ $labels.binary }} service is down"
         description: >-
           The {{ $labels.binary }} service on the {{ $labels.hostname }} node is down.
-{%- endraw %}
     NovaServicesDownMinor:
       if: >-
-        count(openstack_nova_service_state{binary!~"nova-compute"} == 0) by (binary) >= on (binary) count(openstack_nova_service_state{binary!~"nova-compute"}) by (binary) * {{minor_threshold}}
+        count(openstack_nova_service_state{binary!~"nova-compute"} == 0) by (binary) >= on (binary) count(openstack_nova_service_state{binary!~"nova-compute"}) by (binary) * 0.3
       labels:
         severity: minor
         service: nova
       annotations:
-        summary: "{{minor_threshold * 100}}%{%- raw %} of {{ $labels.binary }} services are down"
+        summary: "30% of {{ $labels.binary }} services are down"
         description: >-
-          {{ $value }} {{ $labels.binary }} services (>= {%- endraw %} {{minor_threshold * 100}}%) are down.
+          More than 30% {{ $labels.binary }} services are down.
     NovaComputeServicesDownMinor:
       if: >-
-        count(openstack_nova_service_state{binary="nova-compute"} == 0) >= count(openstack_nova_service_state{binary="nova-compute"}) * {{minor_compute_threshold}}
+        count(openstack_nova_service_state{binary="nova-compute"} == 0) >= count(openstack_nova_service_state{binary="nova-compute"}) * 0.25
       labels:
         severity: minor
         service: nova
       annotations:
-        summary: "{{minor_compute_threshold * 100}}%{%- raw %} of nova-compute services are down"
+        summary: "More than 25% of nova-compute services are down"
         description: >-
-          {{ $value }} nova-compute services (>= {%- endraw %} {{minor_compute_threshold * 100}}%) are down.
+          More than 25% of nova-compute services are down.
     NovaServicesDownMajor:
       if: >-
-        count(openstack_nova_service_state{binary!~"nova-compute"} == 0) by (binary) >= on (binary) count(openstack_nova_service_state{binary!~"nova-compute"}) by (binary) * {{major_threshold}}
+        count(openstack_nova_service_state{binary!~"nova-compute"} == 0) by (binary) >= on (binary) count(openstack_nova_service_state{binary!~"nova-compute"}) by (binary) * 0.6
       labels:
         severity: major
         service: nova
       annotations:
-        summary: "{{major_threshold * 100}}%{%- raw %} of {{ $labels.binary }} services are down"
+        summary: "More than 60% of {{ $labels.binary }} services are down"
         description: >-
-          {{ $value }} {{ $labels.binary }} services (>= {%- endraw %} {{major_threshold * 100}}%) are down.
+          More than 60% of {{ $labels.binary }} services are down.
     NovaComputeServicesDownMajor:
       if: >-
-        count(openstack_nova_service_state{binary="nova-compute"} == 0) >= count(openstack_nova_service_state{binary="nova-compute"}) * {{major_compute_threshold}}
+        count(openstack_nova_service_state{binary="nova-compute"} == 0) >= count(openstack_nova_service_state{binary="nova-compute"}) * 0.5
       labels:
         severity: major
         service: nova
       annotations:
-        summary: "{{major_compute_threshold * 100}}%{%- raw %} of nova-compute services are down"
+        summary: "More than 50% of nova-compute services are down"
         description: >-
-          {{ $value }} nova-compute services (>= {%- endraw %} {{major_compute_threshold * 100}}{%- raw %}%) are down.
+          More than 50% of nova-compute services are down.
     NovaServiceOutage:
       if: >-
         count(openstack_nova_service_state == 0) by (binary) == on (binary) count(openstack_nova_service_state) by (binary)
@@ -152,168 +145,17 @@ server:
         description: >-
           All {{ $labels.binary }} services are down.
 {%- endraw %}
-{%- set cpu_minor_threshold = monitoring.cpu_minor_threshold|float %}
-{%- set cpu_major_threshold = monitoring.cpu_major_threshold|float %}
-{%- set ram_major_threshold = monitoring.ram_major_threshold|float %}
-{%- set ram_critical_threshold = monitoring.ram_critical_threshold|float %}
-{%- set disk_major_threshold = monitoring.disk_major_threshold|float %}
-{%- set disk_critical_threshold = monitoring.disk_critical_threshold|float %}
-    NovaHypervisorVCPUsFullMinor:
-      if: >-
-        label_replace(system_load15, "hostname", "$1", "host", "(.*)") > on (hostname) openstack_nova_vcpus * {{ cpu_minor_threshold }}
-      labels:
-        severity: minor
-        service: nova
-      annotations:
-        summary: "{{ cpu_minor_threshold * 100 }}% of hypervisor VCPUs are used"
-        description: "{% raw %}{{ $value }} VCPUs on the {{ $labels.hostname }} node (> {% endraw %} {{ cpu_minor_threshold * 100 }}%) are used."
-    NovaHypervisorVCPUsFullMajor:
-      if: >-
-        label_replace(system_load15, "hostname", "$1", "host", "(.*)") > on (hostname) openstack_nova_vcpus * {{ cpu_major_threshold }}
-      labels:
-        severity: major
-        service: nova
-      annotations:
-        summary: "{{ cpu_major_threshold * 100 }}% of hypervisor VCPUs are used"
-        description: "{% raw %}{{ $value }} VCPUs on the {{ $labels.hostname }} node (> {% endraw %} {{ cpu_major_threshold * 100 }}%) are used."
-    NovaHypervisorMemoryFullMajor:
-      if: >-
-        openstack_nova_used_ram > openstack_nova_ram * {{ ram_major_threshold }}
-      labels:
-        severity: major
-        service: nova
-      annotations:
-        summary: "{{ ram_major_threshold * 100 }}% of hypervisor RAM is used"
-        description: "{% raw %}{{ $value }}MB of RAM on the {{ $labels.hostname }} node (> {% endraw %} {{ ram_major_threshold * 100 }}%) is used."
-    NovaHypervisorMemoryFullCritical:
-      if: >-
-        openstack_nova_used_ram > openstack_nova_ram * {{ ram_critical_threshold }}
-      labels:
-        severity: critical
-        service: nova
-      annotations:
-        summary: "{{ ram_critical_threshold * 100 }}% of hypervisor RAM is used"
-        description: "{% raw %}{{ $value }}MB of RAM on the {{ $labels.hostname }} node (> {% endraw %} {{ ram_critical_threshold * 100 }}%) is used."
-    NovaHypervisorDiskFullMajor:
-      if: >-
-        openstack_nova_used_disk > openstack_nova_disk * {{ disk_major_threshold }}
-      labels:
-        severity: major
-        service: nova
-      annotations:
-        summary: "{{ disk_major_threshold * 100 }}% of hypervisor disk space is used"
-        description: "{% raw %}{{ $value }}GB of disk space on the {{ $labels.hostname }} node (> {% endraw %} {{ disk_major_threshold * 100 }}%) is used."
-    NovaHypervisorDiskFullCritical:
-      if: >-
-        openstack_nova_used_disk > openstack_nova_disk * {{ disk_critical_threshold }}
-      labels:
-        severity: critical
-        service: nova
-      annotations:
-        summary: "{{ disk_critical_threshold * 100 }}% of hypervisor disk space is used"
-        description: "{% raw %}{{ $value }}GB of disk space on the {{ $labels.hostname }} node (> {% endraw %} {{ disk_critical_threshold * 100 }}%) is used."
-    NovaAggregateMemoryFullMajor:
-      if: >-
-        openstack_nova_aggregate_used_ram > openstack_nova_aggregate_ram * {{ ram_major_threshold }}
-      labels:
-        severity: major
-        service: nova
-      annotations:
-        summary: "{{ ram_major_threshold * 100 }}% of aggregate RAM is used"
-        description: "{% raw %}{{ $value }}MB of RAM on the {{ $labels.aggregate }} aggregate (> {% endraw %} {{ ram_major_threshold * 100 }}%) is used."
-    NovaAggregateMemoryFullCritical:
-      if: >-
-        openstack_nova_aggregate_used_ram > openstack_nova_aggregate_ram * {{ ram_critical_threshold }}
-      labels:
-        severity: critical
-        service: nova
-      annotations:
-        summary: "{{ ram_critical_threshold * 100 }}% of aggregate RAM is used"
-        description: "{% raw %}{{ $value }}MB of RAM on the {{ $labels.aggregate }} aggregate (> {% endraw %} {{ ram_critical_threshold * 100 }}%) is used."
-    NovaAggregateDiskFullMajor:
-      if: >-
-        openstack_nova_aggregate_used_disk > openstack_nova_aggregate_disk * {{ disk_major_threshold }}
-      labels:
-        severity: major
-        service: nova
-      annotations:
-        summary: "{{ disk_major_threshold * 100 }}% of aggregate disk space is used"
-        description: "{% raw %}{{ $value }}GB of disk space on the {{ $labels.aggregate }} aggregate (> {% endraw %} {{ disk_major_threshold * 100 }}%) is used."
-    NovaAggregateDiskFullCritical:
-      if: >-
-        openstack_nova_aggregate_used_disk > openstack_nova_aggregate_disk * {{ disk_critical_threshold }}
-      labels:
-        severity: critical
-        service: nova
-      annotations:
-        summary: "{{ disk_critical_threshold * 100 }}% of aggregate disk space is used"
-        description: "{% raw %}{{ $value }}GB of disk space on the {{ $labels.aggregate }} aggregate (> {% endraw %} {{ disk_critical_threshold * 100 }}%) is used."
-    NovaTotalVCPUsFullMinor:
-      if: >-
-        sum(label_replace(system_load15, "hostname", "$1", "host", "(.*)") and on (hostname) openstack_nova_vcpus) > max(sum(openstack_nova_vcpus) by (instance)) * {{ cpu_minor_threshold }}
-      labels:
-        severity: minor
-        service: nova
-      annotations:
-        summary: "{{ cpu_minor_threshold * 100 }}% of cloud VCPUs are used"
-        description: "{% raw %}{{ $value }} VCPUs in the cloud (> {% endraw %} {{ cpu_minor_threshold * 100 }}%) are used."
-    NovaTotalVCPUsFullMajor:
-      if: >-
-        sum(label_replace(system_load15, "hostname", "$1", "host", "(.*)") and on (hostname) openstack_nova_vcpus) > max(sum(openstack_nova_vcpus) by (instance)) * {{ cpu_major_threshold }}
-      labels:
-        severity: major
-        service: nova
-      annotations:
-        summary: "{{ cpu_major_threshold * 100 }}% of cloud VCPUs are used"
-        description: "{% raw %}{{ $value }} VCPUs in the cloud (> {% endraw %} {{ cpu_major_threshold * 100 }}%) are used."
-    NovaTotalMemoryFullMajor:
-      if: >-
-        openstack_nova_total_used_ram > openstack_nova_total_ram * {{ ram_major_threshold }}
-      labels:
-        severity: major
-        service: nova
-      annotations:
-        summary: "{{ ram_major_threshold * 100 }}% of cloud RAM is used"
-        description: "{% raw %}{{ $value }}MB of RAM in the cloud (> {% endraw %} {{ ram_major_threshold * 100 }}%) is used."
-    NovaTotalMemoryFullCritical:
-      if: >-
-        openstack_nova_total_used_ram > openstack_nova_total_ram * {{ ram_critical_threshold }}
-      labels:
-        severity: critical
-        service: nova
-      annotations:
-        summary: "{{ ram_critical_threshold * 100 }}% of cloud RAM is used"
-        description: "{% raw %}{{ $value }}MB of RAM in the cloud (> {% endraw %} {{ ram_critical_threshold * 100 }}%) is used."
-    NovaTotalDiskFullMajor:
-      if: >-
-        openstack_nova_total_used_disk > openstack_nova_total_disk * {{ disk_major_threshold }}
-      labels:
-        severity: major
-        service: nova
-      annotations:
-        summary: "{{ disk_major_threshold * 100 }}% of cloud disk space is used"
-        description: "{% raw %}{{ $value }}GB of disk space in the cloud (> {% endraw %} {{ disk_major_threshold * 100 }}%) is used."
-    NovaTotalDiskFullCritical:
-      if: >-
-        openstack_nova_total_used_disk > openstack_nova_total_disk * {{ disk_critical_threshold }}
-      labels:
-        severity: critical
-        service: nova
-      annotations:
-        summary: "{{ disk_critical_threshold * 100 }}% of cloud disk space is used"
-        description: "{% raw %}{{ $value }}GB of disk space in the cloud (> {% endraw %} {{ disk_critical_threshold * 100 }}%) is used."
 {%- endif %}
-    NovaErrorLogsTooHigh:
-      {%- set log_threshold = monitoring.error_log_rate.warn|float %}
-      if: >-
-        sum(rate(log_messages{service="nova",level=~"(?i:(error|emergency|fatal))"}[5m])) without (level) > {{ log_threshold }}
 {%- raw %}
+    NovaErrorLogsTooHigh:
+      if: >-
+        sum(rate(log_messages{service="nova",level=~"(?i:(error|emergency|fatal))"}[5m])) without (level) > 0.2
       labels:
         severity: warning
         service: nova
       annotations:
         summary: "High number of errors in Nova logs"
-        description: "The average per-second rate of errors in Nova logs on the {{ $labels.host }} node is {{ $value }} (as measured over the last 5 minutes)."
+        description: "The average rate of errors in Nova logs on the {{ $labels.host }} node is more than 0.2 error messages per second (as measured over the last 5 minutes)."
 {%- endraw %}
 {%- if is_compute and exporters is defined %}
 {%- raw %}
