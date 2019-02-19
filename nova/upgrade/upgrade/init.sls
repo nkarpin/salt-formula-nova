@@ -9,5 +9,7 @@ include:
  - nova.upgrade.service_stopped
  - nova.upgrade.pkgs_latest
  - nova.upgrade.render_config
+{%- if controller.get('enabled', False) %}
  - nova.db.offline_sync
+{%- endif %}
  - nova.upgrade.service_running
