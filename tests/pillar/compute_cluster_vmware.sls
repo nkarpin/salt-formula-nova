@@ -21,6 +21,13 @@ nova:
       user: nova
       password: password
       tenant: service
+      service_user:
+        enabled: True
+        user_domain_id: default
+        project_domain_id: default
+        project_name: service
+        username: nova
+        password: pswd
     logging:
       log_appender: false
       log_handlers:

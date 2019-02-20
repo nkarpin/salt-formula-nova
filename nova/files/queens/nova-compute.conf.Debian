@@ -9173,6 +9173,16 @@ valid_interfaces = internal
 # middleware.
 #  (boolean value)
 #send_service_user_token = false
+{%- if compute.get('service_user', {}).get('enabled', True) %}
+send_service_user_token = True
+  {%- if compute.service_user is defined %}
+  {%- set _data=compute.service_user %}
+  {%- else %}
+  {%- set _data=compute.identity %}
+  {%- endif %}
+{%- if not _data.port == '5000' %}{% do _data.update({'port': '5000'}) %}{% endif %}
+{%- include "oslo_templates/files/queens/keystoneauth/_type_" + auth_type + ".conf" %}
+{%- else %}
 
 # PEM encoded Certificate Authority to use when verifying HTTPs
 # connections. (string value)
@@ -9256,6 +9266,7 @@ valid_interfaces = internal
 
 # Tenant Name (string value)
 #tenant_name = <None>
+{%- endif %}
 
 
 [spice]

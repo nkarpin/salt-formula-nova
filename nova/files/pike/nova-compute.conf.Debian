@@ -9249,6 +9249,24 @@ os_region_name = {{ compute.identity.region }}
 #
 # From nova.conf
 #
+{%- if compute.get('service_user', {}).get('enabled', True) %}
+send_service_user_token = True
+auth_type = password
+  {%- if compute.service_user is defined %}
+  {%- set _data=compute.service_user %}
+  {%- else %}
+  {%- set _data=compute.identity %}
+  {%- endif %}
+user_domain_id = {{ _data.get('domain', 'default') }}
+project_domain_id = {{ _data.get('domain', 'default') }}
+project_name = {{ _data.get('tenant', 'service') }}
+username = {{ _data.get('user', 'nova') }}
+password = {{ _data.password }}
+uth_url={{ compute.identity.get('protocol', 'http') }}://{{ compute.identity.host }}:5000
+  {%- if compute.identity.get('protocol', 'http') == 'https' %}
+cafile={{ compute.identity.get('cacert_file', compute.cacert_file) }}
+  {%- endif %}
+{%- endif %}
 
 #
 # When True, if sending a user token to an REST API, also send a service token.

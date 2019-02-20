@@ -1206,6 +1206,34 @@ Nova database connection setup:
        connection_debug: 10
        pool_timeout: 120
 
+
+Configure nova to use service user tokens:
+========
+Long-running operations such as live migration or snapshot can sometimes overrun the
+expiry of the user token. In such cases, post operations such as cleaning up after a
+live migration can fail when the nova-compute service needs to cleanup resources in
+other services, such as in the block-storage (cinder) or networking (neutron) services.
+
+This patch enables nova to use service user tokens to supplement the regular user token
+used to initiate the operation. The identity service (keystone) will then authenticate
+a request using the service user token if the user token has already expired.
+
+.. code-block:: yaml
+
+   nova:
+     controller:
+     enabled: True
+     ...
+       service_user:
+         enabled: True
+         user_domain_id: default
+         project_domain_id: default
+         project_name: service
+         username: nova
+         password: pswd
+
+
+
 Upgrades
 ========
 
