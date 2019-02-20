@@ -325,6 +325,9 @@ Nova controller services on compute node:
               name: "a1"
               product_id: "154d"
               vendor_id: "8086"
+          passthrough_whitelist:
+            - vendor_id: "10de"
+              product_id: "1db4"
         network:
           engine: neutron
           host: 127.0.0.1
@@ -481,7 +484,7 @@ Enable Barbican integration:
         barbican:
           enabled: true
 
-Define aliases for PCI devices:
+Define aliases for a PCI passthrough devices:
 .. code-block:: yaml
 
     nova:
@@ -494,6 +497,17 @@ Define aliases for PCI devices:
               name: "a1"
               product_id: "154d"
               vendor_id: "8086"
+
+Define white list of PCI devices available to VMs:
+.. code-block:: yaml
+
+    nova:
+      compute:
+        ...
+        pci:
+          passthrough_whitelist:
+            - vendor_id: "10de"
+              product_id: "1db4"
 
 Nova metadata custom bindings:
 
