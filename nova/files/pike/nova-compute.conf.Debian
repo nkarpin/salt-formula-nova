@@ -1028,7 +1028,11 @@ block_device_allocate_retries_interval={{ compute.get('block_device_allocate_ret
 # * Any positive integer in seconds: Enables the option.
 #  (integer value)
 # Minimum value: 0
-#instance_build_timeout=0
+{%- if compute.instance_build_timeout is defined %}
+instance_build_timeout = {{ compute.instance_build_timeout }}
+{%- else %}
+#instance_build_timeout = 0
+{%- endif %}
 
 #
 # Interval to wait before un-rescuing an instance stuck in RESCUE.

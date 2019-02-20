@@ -32,6 +32,7 @@ Nova services on the controller node:
         dhcp_domain: novalocal
         vif_plugging_timeout: 300
         vif_plugging_is_fatal: false
+        instance_build_timeout: 600
         consoleauth:
           token_ttl: 600
         bind:
