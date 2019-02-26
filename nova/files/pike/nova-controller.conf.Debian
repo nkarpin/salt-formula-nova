@@ -9257,7 +9257,7 @@ project_domain_id = {{ _data.get('domain', 'default') }}
 project_name = {{ _data.get('tenant', 'service') }}
 username = {{ _data.get('user', 'nova') }}
 password = {{ _data.password }}
-uth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:5000
+auth_url={{ controller.identity.get('protocol', 'http') }}://{{ controller.identity.host }}:5000
   {%- if controller.identity.get('protocol', 'http') == 'https' %}
 cafile={{ controller.identity.get('cacert_file', controller.cacert_file) }}
   {%- endif %}

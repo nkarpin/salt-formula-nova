@@ -9269,7 +9269,7 @@ project_domain_id = {{ _data.get('domain', 'default') }}
 project_name = {{ _data.get('tenant', 'service') }}
 username = {{ _data.get('user', 'nova') }}
 password = {{ _data.password }}
-uth_url={{ compute.identity.get('protocol', 'http') }}://{{ compute.identity.host }}:5000
+auth_url={{ compute.identity.get('protocol', 'http') }}://{{ compute.identity.host }}:5000
   {%- if compute.identity.get('protocol', 'http') == 'https' %}
 cafile={{ compute.identity.get('cacert_file', compute.cacert_file) }}
   {%- endif %}
