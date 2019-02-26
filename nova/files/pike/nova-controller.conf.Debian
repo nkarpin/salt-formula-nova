@@ -8529,6 +8529,11 @@ alias = {{ alias | json }}
 #  (multi valued)
 # Deprecated group/name - [DEFAULT]/pci_passthrough_whitelist
 #passthrough_whitelist =
+{%- if controller.get('pci', {}).get('passthrough_whitelist', false) %}
+  {%- for item in controller.pci.passthrough_whitelist %}
+passthrough_whitelist = {{ item | json }}
+  {%- endfor %}
+{%- endif %}
 
 
 [placement]

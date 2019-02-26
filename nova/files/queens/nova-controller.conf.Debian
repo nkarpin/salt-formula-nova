@@ -8099,6 +8099,13 @@ passthrough_whitelist = {"devname":"{{ sriov.devname }}","physical_network":"{{ 
 {%- endfor %}
 {%- endif %}
 
+{%- if controller.get('pci', {}).get('passthrough_whitelist', false) %}
+  {%- for item in controller.pci.passthrough_whitelist %}
+passthrough_whitelist = {{ item | json }}
+  {%- endfor %}
+{%- endif %}
+
+
 [placement]
 
 {%- set _data = controller.identity %}

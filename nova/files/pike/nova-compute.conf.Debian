@@ -8546,6 +8546,13 @@ passthrough_whitelist = {{ sriov | json }}
   {%- endfor %}
 {%- endif %}
 
+{%- if compute.get('pci', {}).get('passthrough_whitelist', false) %}
+  {%- for item in compute.pci.passthrough_whitelist %}
+passthrough_whitelist = {{ item | json }}
+  {%- endfor %}
+{%- endif %}
+
+
 [placement]
 
 #
